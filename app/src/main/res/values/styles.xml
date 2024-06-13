@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- res/values/styles.xml -->
+    <style name="MyButtonStyle" parent="Widget.AppCompat.Button">
+        <item name="android:textColor">@color/link</item>
+        <item name="android:backgroundTint">@color/light_blue</item>
+    </style>
+
+    <style name="CustomTabTextAppearance" parent="TextAppearance.MaterialComponents.Button">
+        <!-- 自定义你的样式属性，例如字体大小、颜色等 -->
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/link</item>
+    </style>
+
+
+    <!-- Base application theme -->
+    <style name="AppTheme" parent="Theme.MaterialComponents.Light.DarkActionBar">
+        <!-- Customize your theme here. -->
+        <item name="colorPrimary">@color/link</item>
+        <item name="colorPrimaryDark">@color/blue</item>
+        <item name="colorAccent">@color/white</item>
+    </style>
+    <!-- Style for the AppBarLayout -->
+    <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
+        <!-- Support library compatibility -->
+        <item name="android:background">@color/link</item>
+    </style>
+    <!-- Style for the Popup Menu (e.g., overflow menu) -->
+    <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light">
+        <!-- Support library compatibility -->
+        <item name="android:background">@color/link</item>
+    </style>
+</resources>
