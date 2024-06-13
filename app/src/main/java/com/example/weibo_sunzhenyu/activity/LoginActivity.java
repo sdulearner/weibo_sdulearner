@@ -1,28 +1,42 @@
 package com.example.weibo_sunzhenyu.activity;
 
-import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
+import static androidx.core.view.ViewCompat.setBackgroundTintList;
 
+import android.content.Context;
+import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+
 import com.example.weibo_sunzhenyu.R;
 import com.example.weibo_sunzhenyu.entity.CommonData;
 import com.example.weibo_sunzhenyu.entity.UserInfoItem;
-import com.example.weibo_sunzhenyu.fragment.MyPageFragment;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+import java.util.HashMap;
+import java.util.Map;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
+import retrofit2.Call;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.http.Body;
@@ -48,7 +62,7 @@ public class LoginActivity extends AppCompatActivity {
             .client(okHttpClient)
             .addConverterFactory(GsonConverterFactory.create(gson))
             .build();
-    private MyPageFragment.ApiService apiService = retrofit.create(MyPageFragment.ApiService.class);
+    private ApiService apiService = retrofit.create(ApiService.class);
 
     public interface ApiService {
         // 根据token确定登录状态
@@ -56,14 +70,19 @@ public class LoginActivity extends AppCompatActivity {
         retrofit2.Call<CommonData<UserInfoItem>> queryLogin(@Header("Authorization") String authorizationHeader);
 
         @POST("/weibo/api/auth/sendCode")
-        retrofit2.Call<Void> sendSmsCode(@Body SendCodeRequestBody requestBody);
+        retrofit2.Call<CommonData> sendSmsCode(@Body Map<String, String> requestBody);
+
+        @POST("/weibo/api/auth/login")
+        retrofit2.Call<CommonData> login(@Body Map<String, String> requestBody);
     }
 
     private static class SendCodeRequestBody {
         private String phone;
+
         public SendCodeRequestBody(String phone) {
             this.phone = phone;
         }
+
         public String getPhone() {
             return phone;
         }
@@ -81,6 +100,9 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         EditText input_phone = findViewById(R.id.input_phone);
 
+        final boolean[] sendCodeEnabled = {false};
+        final boolean[] loginEnabled = {false};
+
         EditText input_smsCode = findViewById(R.id.input_smsCode);
 
         TextView count_down = findViewById(R.id.count_down);
@@ -89,6 +111,11 @@ public class LoginActivity extends AppCompatActivity {
 
         Button btn_login = findViewById(R.id.btn_login);
 
+        int sky_blue = ContextCompat.getColor(this, R.color.sky_blue);
+        int link = ContextCompat.getColor(this, R.color.link);
+        ColorStateList colorStateList = ColorStateList.valueOf(sky_blue);
+        btn_login.setBackgroundTintList(colorStateList);
+        btn_login.setEnabled(false);
 
         input_phone.addTextChangedListener(new TextWatcher() {
             @Override
@@ -109,6 +136,37 @@ public class LoginActivity extends AppCompatActivity {
                     // 设置获取验证码样式
                     count_down.setEnabled(true);
                     count_down.setTextColor(getColor(R.color.link));
+                    sendCodeEnabled[0] = true;// 能够发送验证码
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
+
+        input_smsCode.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                // 判断验证码输入
+                btn_login.setEnabled(false);
+                ColorStateList colorStateList = ColorStateList.valueOf(sky_blue);
+                btn_login.setBackgroundTintList(colorStateList);
+                if (s.length() > 6) {
+                    s = s.subSequence(0, s.length() - 1);
+                    input_smsCode.setText(s);//设置新内容
+                    input_smsCode.setSelection(s.length());//设置光标
+                }
+                if (s.length() == 6 && sendCodeEnabled[0]) {
+                    // 设置登录按钮样式
+                    btn_login.setEnabled(true);
+                    colorStateList = ColorStateList.valueOf(link);
+                    btn_login.setBackgroundTintList(colorStateList);
+                    loginEnabled[0] = true;// 能够登录
                 }
             }
 
@@ -119,12 +177,74 @@ public class LoginActivity extends AppCompatActivity {
         count_down.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Toast.makeText(LoginActivity.this, "获取验证码", Toast.LENGTH_SHORT).show();
+//                Toast.makeText(LoginActivity.this, "获取验证码", Toast.LENGTH_SHORT).show();
+                // 使用Gson直接构造请求体（虽然这里没直接用到，但确保Gson存在以解释如何构造复杂对象）
+                Gson gson = new GsonBuilder().create();
+                Map<String, String> requestBody = new HashMap<>();
+                requestBody.put("phone", String.valueOf(input_phone.getText()));
+                retrofit2.Call<CommonData> call = apiService.sendSmsCode(requestBody);
+                call.enqueue(new retrofit2.Callback<CommonData>() {
+                    @Override
+                    public void onResponse(Call<CommonData> call, Response<CommonData> response) {
+                        CommonData body = response.body();
+                        if ((Boolean) body.getData())
+                            Toast.makeText(LoginActivity.this, "发送成功", Toast.LENGTH_SHORT).show();
+                        else
+                            Toast.makeText(LoginActivity.this, "发送失败", Toast.LENGTH_SHORT).show();
+                        // TODO: 2024/6/13 倒计时功能未实现
+                        count_down.setEnabled(false);
+                        count_down.setTextColor(getColor(R.color.gray1));
+                    }
 
+                    @Override
+                    public void onFailure(Call<CommonData> call, Throwable t) {
+                        Log.e(TAG, "sendSmsCode onFailure.");
+                        Toast.makeText(LoginActivity.this, "Network Error:sendSmsCode onFailure.", Toast.LENGTH_SHORT).show();
+                    }
+                });
             }
         });
 
+        btn_login.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Gson gson = new GsonBuilder().create();
+                Map<String, String> requestBody = new HashMap<>();
+                requestBody.put("phone", String.valueOf(input_phone.getText()));
+                requestBody.put("smsCode", String.valueOf(input_smsCode.getText()));
+                retrofit2.Call<CommonData> call = apiService.login(requestBody);
 
+                call.enqueue(new retrofit2.Callback<CommonData>() {
+                    @Override
+                    public void onResponse(Call<CommonData> call, Response<CommonData> response) {
+                        CommonData<UserInfoItem> body = response.body();
+                        if (body != null) {
+                            if (body.getData() != null) {
+                                Toast.makeText(LoginActivity.this, "登录成功", Toast.LENGTH_SHORT).show();
+                                // 请求成功将token保存
+                                String token = String.valueOf(body.getData());
+                                saveUserLoginToken(token);
+                            } else
+                                Toast.makeText(LoginActivity.this, "登录失败，" + body.getMsg(), Toast.LENGTH_SHORT).show();
+                        }
+                    }
+
+                    @Override
+                    public void onFailure(Call<CommonData> call, Throwable t) {
+                        Log.e(TAG, "login onFailure.");
+                        Toast.makeText(LoginActivity.this, "Network Error:login onFailure.", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
         // TODO: 2024/6/13 登录界面左上角toolbar添加返回文字按钮
+    }
+
+    // 使用SharedPreferences保存用户登录状态
+    private void saveUserLoginToken(String token) {
+        SharedPreferences preferences = getSharedPreferences("user_pref", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString("login_token", token);
+        editor.apply();
     }
 }

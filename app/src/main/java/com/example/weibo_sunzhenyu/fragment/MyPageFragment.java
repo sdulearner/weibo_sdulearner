@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -37,6 +38,7 @@ import retrofit2.http.Header;
 public class MyPageFragment extends Fragment {
     private static final String TAG = "MyPageFragment";
     private UserInfoItem user = new UserInfoItem();
+    private boolean login = false;
     private final OkHttpClient okHttpClient = new OkHttpClient.Builder().build();
     private static final MediaType jsonType = MediaType.parse("application/json;charset=utf-8");
     private final Gson gson = new Gson();
@@ -55,15 +57,20 @@ public class MyPageFragment extends Fragment {
     private ApiService apiService = retrofit.create(ApiService.class);
 
     public interface ApiService {
+
         // 根据token确定登录状态
+
         @GET("/weibo/api/user/info")
         retrofit2.Call<CommonData<UserInfoItem>> queryLogin(@Header("Authorization") String authorizationHeader);
     }
 
+    private ImageView my_page_avatar;
+    private TextView text_username;
+    private TextView text_loginStatus;
     // 检查用户是否已经登录
+
     private boolean isUserLogin(Context context) {
         // 登录状态
-        final boolean[] login = {false};
         SharedPreferences preferences = context.getSharedPreferences("user_pref", Context.MODE_PRIVATE);
         String token = preferences.getString("login_token", "");
         String authorizationHeader = "Bearer " + token;
@@ -81,7 +88,17 @@ public class MyPageFragment extends Fragment {
                             user = body.getData();
                             // 用户名不为空表示登录状态
                             if (user.getUsername() != null) {
-                                login[0] = true;
+//                                Log.i(TAG, user.getUsername());
+                                // 登录则加载用户信息
+                                Log.i(TAG, "onCreateView: " + my_page_avatar.getContext());
+                                Glide.with(my_page_avatar.getContext())
+                                        .load(user.getAvatar())
+                                        .into(my_page_avatar);
+                                text_username.setText(user.getUsername());
+                                // TODO: 2024/6/13 用户名下面的粉丝数暂时用phone代替
+                                text_loginStatus.setText(user.getPhone());
+                                // TODO: 2024/6/13 并显示退出登录按钮
+                                login = true;
                             } else {// 用户名为空表示未登录状态
                                 Log.e(TAG, "用户未登录");
                             }
@@ -95,7 +112,29 @@ public class MyPageFragment extends Fragment {
                 Log.e(TAG, "queryLogin onFailure.");
             }
         });
-        return login[0];
+        return login;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        isUserLogin(requireActivity());
+        super.onCreate(savedInstanceState);
+    }
+
+    // 退出登录
+    private void saveUserLoginToken() {
+        SharedPreferences preferences = requireActivity().getSharedPreferences("user_pref", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putString("login_token", "");
+        editor.apply();
+        login = false;
+    }
+
+    // todo：再次显示时刷新，改为用EventBus传递消息，就不用每次刷新了
+    @Override
+    public void onResume() {
+        isUserLogin(requireActivity());
+        super.onResume();
     }
 
     @Nullable
@@ -104,9 +143,30 @@ public class MyPageFragment extends Fragment {
             container, @Nullable Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.my_page_fragment, container, false);
-        ImageView my_page_avatar = view.findViewById(R.id.my_page_avatar);
-        TextView text_username = view.findViewById(R.id.text_username);
-        TextView text_loginStatus = view.findViewById(R.id.text_loginStatus);
+        my_page_avatar = view.findViewById(R.id.my_page_avatar);
+        text_username = view.findViewById(R.id.text_username);
+        text_loginStatus = view.findViewById(R.id.text_loginStatus);
+        text_username.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                isUserLogin(requireActivity());
+            }
+        });
+        text_loginStatus.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                saveUserLoginToken();
+                // TODO: 2024/6/13 退出登录暂时用用户名下面的TextView实现
+                Toast.makeText(requireActivity(), "退出登录", Toast.LENGTH_SHORT).show();
+                // 否则展示未登录信息
+                Glide.with(my_page_avatar.getContext())
+                        .load(R.drawable.weibo)
+                        .into(my_page_avatar);
+                text_username.setText("请先登录");
+                text_loginStatus.setText("点击头像去登录");
+                // TODO: 2024/6/13 并隐藏退出登录按钮
+            }
+        });
         my_page_avatar.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -114,16 +174,17 @@ public class MyPageFragment extends Fragment {
                 startActivity(intent);
             }
         });
-
-        if (isUserLogin(requireActivity())) {
-            // 登录则加载用户信息
-            Glide.with(my_page_avatar.getContext())
-                    .load(user.getAvatar())
-                    .into(my_page_avatar);
-            text_username.setText(user.getUsername());
-            // TODO: 2024/6/13 用户名下面的粉丝数暂时用phone代替
-            text_loginStatus.setText(user.getPhone());
-            // TODO: 2024/6/13 并显示退出登录按钮
+        isUserLogin(requireActivity());
+        if (login) {
+//            // 登录则加载用户信息
+//            Log.i(TAG, "onCreateView: " + my_page_avatar.getContext());
+//            Glide.with(my_page_avatar.getContext())
+//                    .load(user.getAvatar())
+//                    .into(my_page_avatar);
+//            text_username.setText(user.getUsername());
+//            // TODO: 2024/6/13 用户名下面的粉丝数暂时用phone代替
+//            text_loginStatus.setText(user.getPhone());
+//            // TODO: 2024/6/13 并显示退出登录按钮
         } else {
             // 否则展示未登录信息
             Glide.with(my_page_avatar.getContext())
@@ -134,13 +195,5 @@ public class MyPageFragment extends Fragment {
             // TODO: 2024/6/13 并隐藏退出登录按钮
         }
         return view;
-    }
-
-    // 使用SharedPreferences保存用户登录状态
-    private void saveUserLoginToken(String token) {
-        SharedPreferences preferences = requireActivity().getSharedPreferences("user_pref", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putString("login_token", token);
-        editor.apply();
     }
 }
