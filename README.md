@@ -4,4 +4,4 @@
 
 <img src="./images/Screenrecording_20240613_182852.gif" alt="weibo_sdulearner" title="weibo_sdulearner" style="zoom:50%;"/>
 
-[weibo_sdulearner.apk](./app/release/weibo_sdulearner.apk)
+[weibo_sdulearner.apk](./app/debug/app-debug.apk)
