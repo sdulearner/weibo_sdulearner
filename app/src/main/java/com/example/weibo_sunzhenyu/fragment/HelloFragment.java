@@ -116,6 +116,8 @@ public class HelloFragment extends DialogFragment {
             // 跳转到首页
             Intent intent = new Intent(view.getContext(), MainActivity.class);
             startActivity(intent);
+            // 销毁HelloActivity
+            requireActivity().finish();
         });
         view.findViewById(R.id.btn_disagree).setOnClickListener(v -> {
             // 用户不同意，退出应用
