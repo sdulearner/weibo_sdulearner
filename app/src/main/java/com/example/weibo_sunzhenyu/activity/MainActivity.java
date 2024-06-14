@@ -1,8 +1,13 @@
 package com.example.weibo_sunzhenyu.activity;
 
 import android.annotation.SuppressLint;
+import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuItem;
+import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,13 +32,23 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+//        // 设置全屏模式
+//        getWindow().setFlags(
+//                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+//                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+//        );
         setContentView(R.layout.activity_main);
+        // 设置状态栏的颜色
+        Window window = getWindow();
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.setStatusBarColor(getColor(R.color.deep_blue));
 
         Toolbar toolbar = findViewById(R.id.toolbar);
+        TextView title = findViewById(R.id.title);
         setSupportActionBar(toolbar);
 
+
 //        ViewPager2 viewPager = findViewById(R.id.view_pager);
-        // TODO: 2024/6/13 顶部View改颜色改文字
         bottomNavigationView = findViewById(R.id.tab_layout);
 
         // 初始化 Fragment
@@ -56,15 +71,18 @@ public class MainActivity extends AppCompatActivity {
             @SuppressLint("NonConstantResourceId")
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
+                // TODO: 2024/6/14 切换时保持Fragment
                 if (item.getItemId() == R.id.navigation_home) {
                     // 切换到 fragment1
                     showFragment(fragment1);
-                    getSupportActionBar().setTitle("推荐");
+//                    getSupportActionBar().setTitle("推荐");
+                    title.setText("推荐");
                     return true;
                 } else if (item.getItemId() == R.id.navigation_my) {
                     // 切换到 fragment2
                     showFragment(fragment2);
-                    getSupportActionBar().setTitle("我的");
+//                    getSupportActionBar().setTitle("我的");
+                    title.setText("我的");
                     return true;
                 }
                 return false;
@@ -73,7 +91,10 @@ public class MainActivity extends AppCompatActivity {
 
         // 初始时选择第一个 Fragment
         showFragment(fragment1);
-        getSupportActionBar().setTitle("推荐");
+        getSupportActionBar().setTitle(null);
+        getSupportActionBar().setSubtitle(null); // 如果有副标题也一并清空
+        getSupportActionBar().setDisplayShowTitleEnabled(false); // 确保标题区域不占据空间
+        title.setText("推荐");
 
 //        BottomNavigationMenuView menuView = (BottomNavigationMenuView) bottomNavigationView.getChildAt(0);
 //

@@ -14,11 +14,14 @@
 
 
     <!-- Base application theme -->
-    <style name="AppTheme" parent="Theme.MaterialComponents.Light.DarkActionBar">
+<style name="AppTheme.NoActionBar" parent="Theme.AppCompat.Light.NoActionBar">
         <!-- Customize your theme here. -->
-        <item name="colorPrimary">@color/link</item>
-        <item name="colorPrimaryDark">@color/blue</item>
-        <item name="colorAccent">@color/white</item>
+<!--        <item name="colorPrimary">@color/link</item>-->
+<!--        <item name="colorPrimaryDark">@color/blue</item>-->
+<!--        <item name="colorAccent">@color/white</item>-->
+        <!-- 其他样式设置 -->
+        <item name="android:statusBarColor">@color/link</item> <!-- 状态栏颜色 -->
+        <item name="android:windowLightStatusBar">true</item> <!-- 如果状态栏背景是深色，设置为true -->
     </style>
     <!-- Style for the AppBarLayout -->
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">

@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
+import android.view.WindowManager;
 
 import com.example.weibo_sunzhenyu.R;
 import com.example.weibo_sunzhenyu.fragment.HelloFragment;
@@ -46,6 +47,11 @@ public class HelloActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        // 设置全屏模式
+        getWindow().setFlags(
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS,
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS
+        );
         setContentView(R.layout.activity_hello);
         // 启动页展示500ms
         handler.sendEmptyMessageDelayed(HANDLER_SPLASH, 500);

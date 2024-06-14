@@ -5,13 +5,16 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Color;
 import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.Spanned;
+import android.text.TextPaint;
 import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,7 +36,6 @@ public class HelloFragment extends DialogFragment {
 //        // 加载布局并设置视图
 //        View view = inflater.inflate(R.layout.hello_fragment, container, false);
 ////        getDialog().getWindow().setLayout(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT);
-//        // TODO: 2024/6/12 编写DialogFragment的样式
 //        // 设置按钮点击监听器
 //        view.findViewById(R.id.btn_agree).setOnClickListener(v -> {
 //            // 保存用户同意状态
@@ -109,16 +111,19 @@ public class HelloFragment extends DialogFragment {
 
         View view = LayoutInflater.from(requireActivity()).inflate(R.layout.hello_fragment, null);
         // 设置按钮点击监听器
-        view.findViewById(R.id.btn_agree).setOnClickListener(v -> {
+        TextView btn_agree = view.findViewById(R.id.btn_agree);
+        btn_agree.setOnClickListener(v -> {
             // 保存用户同意状态
             saveUserAgreement();
             dismiss(); // 关闭弹窗
             // 跳转到首页
             Intent intent = new Intent(view.getContext(), MainActivity.class);
+            // TODO: 2024/6/15 通过Activity转场动画，闪屏页自然过渡到首页，动画自由发挥
             startActivity(intent);
             // 销毁HelloActivity
             requireActivity().finish();
         });
+
         view.findViewById(R.id.btn_disagree).setOnClickListener(v -> {
             // 用户不同意，退出应用
             requireActivity().finishAffinity(); // 如果在Activity中，可以结束当前Activity及其上的所有Activity
@@ -127,12 +132,24 @@ public class HelloFragment extends DialogFragment {
 
         TextView tv_title = view.findViewById(R.id.tv_title);
         TextView tv_message = view.findViewById(R.id.tv_message);
+        // 清除TextView的选中状态（可能有助于避免点击时的背景颜色变化）
+        tv_message.setHighlightColor(Color.TRANSPARENT); // 设置为透明色
+        tv_message.setSelected(false); // 清除选中状态
+
         SpannableString spannableString = new SpannableString("欢迎使用iH微博，" +
                 "我们将严格遵守相关法律和隐私政策保护您的个人隐私，请您阅读并同意《用户协议》与《隐私政策》");
         ClickableSpan userAgreementSpan = new ClickableSpan() {
             @Override
             public void onClick(View widget) {
+
                 Toast.makeText(getContext(), "查看⽤⼾协议", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void updateDrawState(TextPaint ds) {
+                super.updateDrawState(ds);
+                ds.setColor(requireActivity().getColor(R.color.link)); // 设置链接文本颜色为蓝色
+                ds.setUnderlineText(false); // 取消下划线
             }
         };
         ClickableSpan privacyPolicySpan = new ClickableSpan() {
@@ -140,8 +157,14 @@ public class HelloFragment extends DialogFragment {
             public void onClick(@NonNull View widget) {
                 Toast.makeText(getContext(), "查看隐私政策", Toast.LENGTH_SHORT).show();
             }
+
+            @Override
+            public void updateDrawState(TextPaint ds) {
+                super.updateDrawState(ds);
+                ds.setColor(requireActivity().getColor(R.color.link)); // 设置链接文本颜色为蓝色
+                ds.setUnderlineText(false); // 取消下划线
+            }
         };
-        // TODO: 2024/6/13 设置链接字体为蓝色， 设置两个按钮点击改变颜色
         // 设置用户协议的Span
         int start = 41;//文本中“用户协议”的起始位置
         int end = 47;//文本中“用户协议”的结束位置
@@ -172,8 +195,10 @@ public class HelloFragment extends DialogFragment {
         });
 
         // 设置对话框背景为圆角矩形
-        dialog.getWindow().setBackgroundDrawableResource(R.drawable.rounded_background);
-        // todo:设置宽度为屏幕宽度的80%，你可以根据需要调整这个比例
+        dialog.getWindow().
+
+                setBackgroundDrawableResource(R.drawable.rounded_background);
+        // todo:2024/6/15 设置DialogFragment宽度为屏幕宽度的80%，你可以根据需要调整这个比例
 //        int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.5f); // 80%的屏幕宽度
 //        dialog.getWindow().setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT); // 设置宽度，高度根据内容自适应
 

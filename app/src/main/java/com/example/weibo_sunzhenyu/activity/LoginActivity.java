@@ -15,6 +15,8 @@ import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -25,10 +27,15 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
 import com.example.weibo_sunzhenyu.R;
+import com.example.weibo_sunzhenyu.component.CountDownButton;
 import com.example.weibo_sunzhenyu.entity.CommonData;
+import com.example.weibo_sunzhenyu.entity.LoginEvent;
 import com.example.weibo_sunzhenyu.entity.UserInfoItem;
+import com.example.weibo_sunzhenyu.utils.Utils;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+
+import org.greenrobot.eventbus.EventBus;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -96,16 +103,25 @@ public class LoginActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // TODO: 2024/6/15 登录界面左上角toolbar添加返回文字按钮
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-        EditText input_phone = findViewById(R.id.input_phone);
+        // 设置状态栏的颜色
+        Window window = getWindow();
+        window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+        window.setStatusBarColor(getColor(R.color.deep_blue));
 
+        EditText input_phone = findViewById(R.id.input_phone);
         final boolean[] sendCodeEnabled = {false};
-        final boolean[] loginEnabled = {false};
+        boolean loginEnabled = false;
 
         EditText input_smsCode = findViewById(R.id.input_smsCode);
 
-        TextView count_down = findViewById(R.id.count_down);
+        CountDownButton count_down = findViewById(R.id.count_down);
+        // 设置倒计时文本
+        count_down.setCountDownText("获取验证码", "获取验证码");
+
+
         count_down.setEnabled(false);
         count_down.setTextColor(getColor(R.color.gray1));
 
@@ -125,18 +141,30 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 // 判断未尾输入
-                count_down.setEnabled(false);
-                count_down.setTextColor(getColor(R.color.gray1));
                 if (s.length() > 11) {
                     s = s.subSequence(0, s.length() - 1);
                     input_phone.setText(s);//设置新内容
                     input_phone.setSelection(s.length());//设置光标
-                }
-                if (s.length() == 11) {
+                } else if (s.length() == 11) {
                     // 设置获取验证码样式
-                    count_down.setEnabled(true);
-                    count_down.setTextColor(getColor(R.color.link));
-                    sendCodeEnabled[0] = true;// 能够发送验证码
+                    // 需要设置一个bool变量，当倒计时的时候不能发送验证码
+                    if (!count_down.isCountingDown()) {
+                        count_down.setEnabled(true);
+                        count_down.setTextColor(getColor(R.color.link));
+                        sendCodeEnabled[0] = true;// 能够发送验证码
+                    }
+                    // 如果验证码同时为6位则能够登录
+                    if (String.valueOf(input_smsCode.getText()).length() == 6) {
+                        btn_login.setEnabled(true);
+                        ColorStateList colorStateList = ColorStateList.valueOf(link);
+                        btn_login.setBackgroundTintList(colorStateList);
+                    }
+                } else {
+                    count_down.setEnabled(false);
+                    count_down.setTextColor(getColor(R.color.gray1));
+                    ColorStateList colorStateList = ColorStateList.valueOf(sky_blue);
+                    btn_login.setBackgroundTintList(colorStateList);
+                    btn_login.setEnabled(false);
                 }
             }
 
@@ -166,7 +194,6 @@ public class LoginActivity extends AppCompatActivity {
                     btn_login.setEnabled(true);
                     colorStateList = ColorStateList.valueOf(link);
                     btn_login.setBackgroundTintList(colorStateList);
-                    loginEnabled[0] = true;// 能够登录
                 }
             }
 
@@ -191,7 +218,7 @@ public class LoginActivity extends AppCompatActivity {
                             Toast.makeText(LoginActivity.this, "发送成功", Toast.LENGTH_SHORT).show();
                         else
                             Toast.makeText(LoginActivity.this, "发送失败", Toast.LENGTH_SHORT).show();
-                        // TODO: 2024/6/13 倒计时功能未实现
+                        count_down.startCountDown(); // 开始倒计时
                         count_down.setEnabled(false);
                         count_down.setTextColor(getColor(R.color.gray1));
                     }
@@ -223,7 +250,10 @@ public class LoginActivity extends AppCompatActivity {
                                 Toast.makeText(LoginActivity.this, "登录成功", Toast.LENGTH_SHORT).show();
                                 // 请求成功将token保存
                                 String token = String.valueOf(body.getData());
-                                saveUserLoginToken(token);
+                                Utils.saveUserLoginToken(LoginActivity.this, token);
+                                // 登录成功后调用EventBus修改上一页信息并返回上一页
+                                EventBus.getDefault().post(new LoginEvent(true));
+                                onBackPressed();
                             } else
                                 Toast.makeText(LoginActivity.this, "登录失败，" + body.getMsg(), Toast.LENGTH_SHORT).show();
                         }
@@ -237,14 +267,7 @@ public class LoginActivity extends AppCompatActivity {
                 });
             }
         });
-        // TODO: 2024/6/13 登录界面左上角toolbar添加返回文字按钮
     }
 
-    // 使用SharedPreferences保存用户登录状态
-    private void saveUserLoginToken(String token) {
-        SharedPreferences preferences = getSharedPreferences("user_pref", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putString("login_token", token);
-        editor.apply();
-    }
+
 }
