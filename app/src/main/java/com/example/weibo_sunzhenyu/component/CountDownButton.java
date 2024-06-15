@@ -32,7 +32,7 @@ public class CountDownButton extends androidx.appcompat.widget.AppCompatTextView
             } else {
                 setText(textAfterCountdown);
                 isCountingDown = false;
-                // todo: 2024/6/15 如果此时电话为11位则改颜色为蓝色并且可点击
+                // todo: 2024/6/17 如果此时电话为11位则改颜色为蓝色并且可点击
 //                setTextColor(getResources().getColor(R.color.link));
 //                setEnabled(true);
             }

@@ -20,6 +20,7 @@ import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.weibo_sunzhenyu.R;
 import com.example.weibo_sunzhenyu.activity.LoginActivity;
 import com.example.weibo_sunzhenyu.entity.CommonData;
@@ -87,24 +88,31 @@ public class MyPageFragment extends Fragment {
                     @Override
                     public void run() {
                         if (body != null) {
-                            // 请求成功将用户赋给变量
-                            user = body.getData();
-                            // 用户名不为空表示登录状态
-                            if (user.getUsername() != null) {
+                            if (body.getData() == null && body.getCode() == 403) {
+                                // token过期，未登录状态
+                                Utils.clearToken(requireActivity());
+                                Log.e(TAG, "token过期");
+                            } else {
+                                // 请求成功将用户赋给变量
+                                user = body.getData();
+                                // 用户名不为空表示登录状态
+                                if (user.getUsername() != null) {
 //                                Log.i(TAG, user.getUsername());
-                                // 登录则加载用户信息
-                                Log.i(TAG, "onCreateView: " + my_page_avatar.getContext());
-                                Glide.with(my_page_avatar.getContext())
-                                        .load(user.getAvatar())
-                                        .into(my_page_avatar);
-                                text_username.setText(user.getUsername());
-                                // TODO: 2024/6/15 用户名下面的粉丝数暂时用phone代替
-                                text_loginStatus.setText(user.getPhone());
-                                // 并显示退出登录按钮
-                                logout.setVisibility(View.VISIBLE);
-                                login = true;
-                            } else {// 用户名为空表示未登录状态
-                                Log.e(TAG, "用户未登录");
+                                    // 登录则加载用户信息
+                                    Log.i(TAG, "onCreateView: " + my_page_avatar.getContext());
+                                    Glide.with(my_page_avatar.getContext())
+                                            .load(user.getAvatar())
+                                            .diskCacheStrategy(DiskCacheStrategy.ALL)
+                                            .into(my_page_avatar);
+                                    text_username.setText(user.getUsername());
+                                    // TODO: 2024/6/17 用户名下面的粉丝数暂时用phone代替
+                                    text_loginStatus.setText(user.getPhone());
+                                    // 并显示退出登录按钮
+                                    logout.setVisibility(View.VISIBLE);
+                                    login = true;
+                                } else {// 用户名为空表示未登录状态
+                                    Log.e(TAG, "用户未登录");
+                                }
                             }
                         }
                     }
@@ -118,17 +126,6 @@ public class MyPageFragment extends Fragment {
         });
         return login;
     }
-
-
-    // 退出登录时清除token
-    private void saveUserLoginToken() {
-        SharedPreferences preferences = requireActivity().getSharedPreferences("user_pref", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putString("login_token", "");
-        editor.apply();
-        login = false;
-    }
-
 
     // 注册和取消注册EventBus
     @Override
@@ -152,11 +149,13 @@ public class MyPageFragment extends Fragment {
     }
 
     private void logout() {
-        saveUserLoginToken();
+        Utils.clearToken(requireActivity());
+        login = false;
         Toast.makeText(requireActivity(), "退出登录", Toast.LENGTH_SHORT).show();
         // 展示未登录信息
         Glide.with(my_page_avatar.getContext())
                 .load(R.drawable.weibo)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(my_page_avatar);
         text_username.setText("请先登录");
         text_loginStatus.setText("点击头像登录");
@@ -207,6 +206,7 @@ public class MyPageFragment extends Fragment {
             // 否则展示未登录信息
             Glide.with(my_page_avatar.getContext())
                     .load(R.drawable.weibo)
+                    .diskCacheStrategy(DiskCacheStrategy.ALL)
                     .into(my_page_avatar);
             text_username.setText("请先登录");
             text_loginStatus.setText("点击头像去登录");

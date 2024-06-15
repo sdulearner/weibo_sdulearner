@@ -28,6 +28,8 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     private BottomNavigationView bottomNavigationView;
     private FragmentManager fragmentManager;
+    private HomeFragment fragment1;
+    private MyPageFragment fragment2;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,41 +49,63 @@ public class MainActivity extends AppCompatActivity {
         TextView title = findViewById(R.id.title);
         setSupportActionBar(toolbar);
 
-
 //        ViewPager2 viewPager = findViewById(R.id.view_pager);
         bottomNavigationView = findViewById(R.id.tab_layout);
-
-        // 初始化 Fragment
-        List<Fragment> fragments = new ArrayList<>();
-        HomeFragment fragment1 = new HomeFragment();
-        MyPageFragment fragment2 = new MyPageFragment();
-        fragments.add(fragment1);
-        fragments.add(fragment2);
-
-//        FragmentManager fragmentManager = getSupportFragmentManager();
-        MyFragmentAdapter adapter = new MyFragmentAdapter(this, fragments);
-//        viewPager.setAdapter(adapter);
 
         // 初始化 BottomNavigationView 和 FragmentManager
         bottomNavigationView = findViewById(R.id.tab_layout);
         fragmentManager = getSupportFragmentManager();
+
+        // 初始时选择第一个 Fragment
+        fragment1 = new HomeFragment();
+        fragmentManager.beginTransaction()
+                .setReorderingAllowed(true)
+                .add(R.id.fragment_container, fragment1, null)
+                .commit();
+
+        // 设置ToolBar
+        getSupportActionBar().setTitle(null);
+        getSupportActionBar().setSubtitle(null); // 如果有副标题也一并清空
+        getSupportActionBar().setDisplayShowTitleEnabled(false); // 确保标题区域不占据空间
+        title.setText("推荐");
 
         // 设置 BottomNavigationView 的监听器
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @SuppressLint("NonConstantResourceId")
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                // TODO: 2024/6/14 切换时保持Fragment
+                //切换时保持Fragment
                 if (item.getItemId() == R.id.navigation_home) {
                     // 切换到 fragment1
-                    showFragment(fragment1);
-//                    getSupportActionBar().setTitle("推荐");
+                    fragmentManager.beginTransaction()
+                            .setReorderingAllowed(true)
+                            .show(fragment1)
+                            .commit();
+                    fragmentManager.beginTransaction()
+                            .setReorderingAllowed(true)
+                            .hide(fragment2)
+                            .commit();
                     title.setText("推荐");
                     return true;
                 } else if (item.getItemId() == R.id.navigation_my) {
-                    // 切换到 fragment2
-                    showFragment(fragment2);
-//                    getSupportActionBar().setTitle("我的");
+                    //动态添加MyPageFragment，如果第一次点击则建立一个新的，否则直接显示出来
+                    if (fragment2 == null) {
+                        fragment2 = new MyPageFragment();
+                        fragmentManager.beginTransaction()
+                                .setReorderingAllowed(true)
+                                .add(R.id.fragment_container, fragment2, null)
+                                .commit();
+                    } else {
+                        // 切换到 fragment2
+                        fragmentManager.beginTransaction()
+                                .setReorderingAllowed(true)
+                                .show(fragment2)
+                                .commit();
+                    }
+                    fragmentManager.beginTransaction()
+                            .setReorderingAllowed(true)
+                            .hide(fragment1)
+                            .commit();
                     title.setText("我的");
                     return true;
                 }
@@ -89,12 +113,6 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // 初始时选择第一个 Fragment
-        showFragment(fragment1);
-        getSupportActionBar().setTitle(null);
-        getSupportActionBar().setSubtitle(null); // 如果有副标题也一并清空
-        getSupportActionBar().setDisplayShowTitleEnabled(false); // 确保标题区域不占据空间
-        title.setText("推荐");
 
 //        BottomNavigationMenuView menuView = (BottomNavigationMenuView) bottomNavigationView.getChildAt(0);
 //
@@ -126,9 +144,9 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
-    private void showFragment(Fragment fragment) {
-        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
-        fragmentTransaction.replace(R.id.fragment_container, fragment);
-        fragmentTransaction.commit();
-    }
+//    private void showFragment(Fragment fragment) {
+//        FragmentTransaction fragmentTransaction = fragmentManager.beginTransaction();
+//        fragmentTransaction.replace(R.id.fragment_container, fragment);
+//        fragmentTransaction.commit();
+//    }
 }

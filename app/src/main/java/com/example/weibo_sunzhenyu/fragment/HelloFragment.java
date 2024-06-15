@@ -118,7 +118,7 @@ public class HelloFragment extends DialogFragment {
             dismiss(); // 关闭弹窗
             // 跳转到首页
             Intent intent = new Intent(view.getContext(), MainActivity.class);
-            // TODO: 2024/6/15 通过Activity转场动画，闪屏页自然过渡到首页，动画自由发挥
+            // TODO: 2024/6/17 通过Activity转场动画，闪屏页自然过渡到首页，动画自由发挥
             startActivity(intent);
             // 销毁HelloActivity
             requireActivity().finish();
@@ -198,7 +198,7 @@ public class HelloFragment extends DialogFragment {
         dialog.getWindow().
 
                 setBackgroundDrawableResource(R.drawable.rounded_background);
-        // todo:2024/6/15 设置DialogFragment宽度为屏幕宽度的80%，你可以根据需要调整这个比例
+        // todo:2024/6/17 设置DialogFragment宽度为屏幕宽度的80%，你可以根据需要调整这个比例
 //        int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.5f); // 80%的屏幕宽度
 //        dialog.getWindow().setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT); // 设置宽度，高度根据内容自适应
 

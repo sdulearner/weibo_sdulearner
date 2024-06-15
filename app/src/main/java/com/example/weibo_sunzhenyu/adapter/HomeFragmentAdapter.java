@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.chad.library.adapter.base.BaseQuickAdapter;
 import com.chad.library.adapter.base.module.BaseLoadMoreModule;
 import com.chad.library.adapter.base.module.LoadMoreModule;
@@ -47,6 +48,7 @@ public class HomeFragmentAdapter extends BaseQuickAdapter<WeiboInfoItem, BaseVie
         ImageView big_avatar = baseViewHolder.getView(R.id.big_avatar);
         Glide.with(big_avatar.getContext())
                 .load(weiboInfoItem.getAvatar())
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(big_avatar);
 
         // 2.加载用户名
@@ -54,7 +56,7 @@ public class HomeFragmentAdapter extends BaseQuickAdapter<WeiboInfoItem, BaseVie
         big_username.setText(weiboInfoItem.getUsername());
 
         // 加载title
-        // TODO: 2024/6/14 设置为最大六行
+        // 设置为最大六行
         TextView big_title = baseViewHolder.getView(R.id.big_title);
         big_title.setText(weiboInfoItem.getTitle());
         // Set maximum lines to 6

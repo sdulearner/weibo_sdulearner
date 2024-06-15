@@ -2,25 +2,29 @@ package com.example.weibo_sunzhenyu.layout;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.example.weibo_sunzhenyu.R;
 import com.example.weibo_sunzhenyu.component.CustomVideoPlayer;
-import com.example.weibo_sunzhenyu.component.VideoPlayer;
 
 import java.util.List;
 
@@ -34,43 +38,51 @@ public class MediaView extends FrameLayout {
     private List<String> mTags = null;
     private CustomVideoPlayer customVideoPlayer;
 
+    private boolean isSingleImage = false;
+    private boolean isVideo = false;
+    private int singleImageWidth = 0;
+    private int singleImageHeight = 0;
+
     public MediaView(@NonNull Context context) {
         super(context);
-        init(context);
     }
 
     public MediaView(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
-        init(context);
+        init(attrs);
     }
 
     public MediaView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.MediaView);
-        mHorizontalMargin = a.getDimension(R.styleable.MediaView_hMargin, 10);
-        mVerticalMargin = a.getDimension(R.styleable.MediaView_vMargin, 10);
-        a.recycle();
-        init(context);
+        init(attrs);
     }
 
-    private void init(Context context) {
-        customVideoPlayer = new CustomVideoPlayer(context);
-        // Add CustomVideoPlayer to the FrameLayout
-//        addView(customVideoPlayer, new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT));
-        // TODO: 2024/6/14  
-        addView(customVideoPlayer, new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, 500));
+    private void init(@Nullable AttributeSet attrs) {
+        if (attrs != null) {
+            TypedArray a = getContext().obtainStyledAttributes(attrs, R.styleable.MediaView);
+            mHorizontalMargin = a.getDimension(R.styleable.MediaView_hMargin, 10);
+            mVerticalMargin = a.getDimension(R.styleable.MediaView_vMargin, 10);
+            a.recycle();
+        }
     }
-
 
     private void loadVideo(String coverUrl, String videoUrl) {
+        // 视频
+        isVideo = true;
+        customVideoPlayer = new CustomVideoPlayer(getContext());
         Log.i(TAG, "loadVideo: Start loading video from URL: " + coverUrl);
         customVideoPlayer.setVideo(coverUrl, videoUrl);
+        // 默认显示横图样式
+        requestLayout();
         addView(customVideoPlayer);
     }
+
 
     // 加载MediaView中的信息
     public void setTags(List<String> tags, boolean isPhoto) {
         removeAllViews();
+        isSingleImage = false;
+        isVideo = false;
         mTags = tags;
         if (isPhoto) {
             if (tags != null && !tags.isEmpty()) {
@@ -85,6 +97,231 @@ public class MediaView extends FrameLayout {
                 customVideoPlayer.setVisibility(View.VISIBLE);
             }
         }
+    }
+
+
+    private void displayImages() {
+        int size = mTags.size();
+        if (size == 1) {
+            addSingleImage(mTags.get(0));
+        } else {
+            addGridImages(mTags);
+        }
+    }
+
+    // 调整Layout的方法
+    private void adjustSingleImageViewLayout(int width, int height) {
+        LayoutParams params;
+        Log.i(TAG, "adjustImageViewLayout: " + "width: " + width + " height:" + height);
+        if (width > height) {
+            // Horizontal image
+            params = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
+            singleImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        } else {
+            // Vertical image
+            params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
+            singleImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        }
+        singleImageView.setLayoutParams(params);
+    }
+
+    private void addSingleImage(String url) {
+        isSingleImage = true;
+        singleImageView = new ImageView(getContext());
+        singleImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+        singleImageView.setImageDrawable(new ColorDrawable(0xFFCCCCCC)); // 灰色方框作为占位符
+
+        Log.i(TAG, "addSingleImage: ");
+        Glide.with(getContext())
+                .load(url)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .listener(new RequestListener<Drawable>() {
+                    @Override
+                    public boolean onLoadFailed(@Nullable GlideException e, Object model, Target<Drawable> target, boolean isFirstResource) {
+                        Log.i(TAG, "onLoadFailed: ");
+                        return false;
+                    }
+
+                    @Override
+                    public boolean onResourceReady(@NonNull Drawable resource, Object model, @NonNull Target<Drawable> target, @NonNull DataSource dataSource, boolean isFirstResource) {
+                        singleImageWidth = resource.getIntrinsicWidth();
+                        singleImageHeight = resource.getIntrinsicHeight();
+                        Log.i(TAG, "onResourceReady: " + "width: " + singleImageWidth + " height:" + singleImageHeight);
+                        requestLayout(); // 重新布局
+                        return false;
+                    }
+                })
+                .into(singleImageView);
+        addView(singleImageView);
+    }
+
+    private void addGridImages(List<String> urls) {
+        int imageSize = (getWidth() - (int) mHorizontalMargin * 2) / 3;
+        int gridSize = Math.min(urls.size(), 9); // Limit to 9 images
+
+        for (int i = 0; i < gridSize; i++) {
+            ImageView imageView = new ImageView(getContext());
+            LayoutParams params = new LayoutParams(imageSize, imageSize);
+            imageView.setLayoutParams(params);
+            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            imageView.setBackgroundColor(getResources().getColor(R.color.gray2)); // 灰色方框作为未加载时的占位
+            Glide.with(getContext()).load(urls.get(i)).diskCacheStrategy(DiskCacheStrategy.ALL).into(imageView);
+            addView(imageView);
+        }
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        int totalWidth = MeasureSpec.getSize(widthMeasureSpec);
+//        int totalHeight = 0;
+//        if (isSingleImage) {
+//            // 单张图片的宽高使用Glide动态获取，根据宽高显示横图样式或竖图样式
+//            if (singleImageWidth > singleImageHeight) {
+//                // 横图样式
+//                totalHeight = (int) (totalWidth * ((float) singleImageHeight / singleImageWidth));
+//            } else {
+//                // 竖图样式
+//                totalHeight = Math.min(totalWidth, singleImageHeight);
+//            }
+//            setMeasuredDimension(totalWidth, totalHeight);
+//            measureChild(singleImageView, widthMeasureSpec, heightMeasureSpec);
+//        } else if (isVideo) {
+//            // 视频显示规则：默认显示横图样式
+//            totalHeight = 500; // 默认视频高度
+//            setMeasuredDimension(totalWidth, totalHeight);
+//            measureChild(customVideoPlayer, widthMeasureSpec, heightMeasureSpec);
+        if (isSingleImage && singleImageWidth > 0 && singleImageHeight > 0) {
+            // 单张图片或视频显示横图样式
+            int childWidth = totalWidth;
+            // 横图时高为父View的宽*图像的高/图像的宽，竖图时高为父View的宽
+            int childHeight = (singleImageWidth > singleImageHeight) ? totalWidth * singleImageHeight / singleImageWidth : totalWidth;
+            setMeasuredDimension(totalWidth, childHeight);
+            int childWidthSpec = MeasureSpec.makeMeasureSpec(childWidth, MeasureSpec.EXACTLY);
+            int childHeightSpec = MeasureSpec.makeMeasureSpec(childHeight, MeasureSpec.EXACTLY);
+            singleImageView.measure(childWidthSpec, childHeightSpec);
+        } else if (isVideo) {
+            // 视频显示规则：默认显示横图样式
+            int childWidth = totalWidth;
+            int childHeight = totalWidth * customVideoPlayer.getVideoHeight() / customVideoPlayer.getVideoWidth();
+            int childWidthSpec = MeasureSpec.makeMeasureSpec(childWidth, MeasureSpec.EXACTLY);
+            int childHeightSpec = MeasureSpec.makeMeasureSpec(childHeight, MeasureSpec.EXACTLY);
+            setMeasuredDimension(childWidth, childHeight);
+            customVideoPlayer.measure(childWidthSpec, childHeightSpec);
+        } else {
+            int childWidth = (totalWidth - (int) mHorizontalMargin * 2) / 3;
+            int totalHeight = (childWidth + (int) mVerticalMargin) * ((getChildCount() + 2) / 3);
+            setMeasuredDimension(totalWidth, totalHeight);
+
+            int childWidthSpec = MeasureSpec.makeMeasureSpec(childWidth, MeasureSpec.EXACTLY);
+            int childHeightSpec = MeasureSpec.makeMeasureSpec(childWidth, MeasureSpec.EXACTLY);
+            for (int i = 0; i < getChildCount(); i++) {
+                View child = getChildAt(i);
+                if (child.getVisibility() != GONE) {
+                    child.measure(childWidthSpec, childHeightSpec);
+                }
+            }
+        }
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        int totalWidth = getWidth();
+        if (isSingleImage && singleImageWidth > 0 && singleImageHeight > 0) {
+            // 布局单张图片
+            int childWidth = totalWidth;
+            int childHeight = (singleImageWidth > singleImageHeight) ? singleImageView.getMeasuredHeight() : totalWidth;
+            singleImageView.layout(0, 0, childWidth, childHeight);
+        } else if (isVideo) {
+            // 布局视频
+            customVideoPlayer.layout(0, 0, customVideoPlayer.getMeasuredWidth(), customVideoPlayer.getMeasuredHeight());
+        } else {
+            int childWidth = (getWidth() - (int) mHorizontalMargin * 2) / 3;
+            int childHeight = childWidth;
+            int childLeft;
+            int childTop;
+            for (int i = 0; i < getChildCount(); i++) {
+                View child = getChildAt(i);
+                if (child.getVisibility() != GONE) {
+                    childLeft = (i % 3) * (childWidth + (int) mHorizontalMargin / 2);
+                    childTop = (i / 3) * (childHeight + (int) mVerticalMargin / 2);
+                    child.layout(childLeft, childTop, childLeft + childWidth, childTop + childHeight);
+                }
+            }
+        }
+//        else if (isVideo) {
+//            // 布局视频
+//            int childWidth = customVideoPlayer.getMeasuredWidth();
+//            int childHeight = customVideoPlayer.getMeasuredHeight();
+//            customVideoPlayer.layout(0, 0, childWidth, childHeight);
+//        } else {
+//            // 布局九宫格图片
+//            int childWidth = (totalWidth - (int) mHorizontalMargin * 2) / 3;
+//            int childHeight = childWidth;
+//            int childLeft;
+//            int childTop;
+//            for (int i = 0; i < getChildCount(); i++) {
+//                View child = getChildAt(i);
+//                if (child.getVisibility() != GONE) {
+//                    childLeft = (i % 3) * (childWidth + (int) mHorizontalMargin / 2);
+//                    childTop = (i / 3) * (childHeight + (int) mVerticalMargin / 2);
+//                    child.layout(childLeft, childTop, childLeft + childWidth, childTop + childHeight);
+//                }
+//            }
+//        }
+    }
+}
+//    private void addSingleImage(String url) {
+//        singleImageView = new ImageView(getContext());
+////        LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+////        imageView.setLayoutParams(params);
+////        singleImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+//        LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, 500);
+//        singleImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
+//        singleImageView.setLayoutParams(params);
+//
+//        Log.i(TAG, "addSingleImage: ");
+//        Glide.with(getContext())
+//                .load(url)
+//                .diskCacheStrategy(DiskCacheStrategy.ALL)
+////                .listener(new RequestListener<Drawable>() {
+////                    @Override
+////                    public boolean onLoadFailed(@Nullable GlideException e, Object model, @NonNull Target<Drawable> target, boolean isFirstResource) {
+////                        Log.i(TAG, "addSingleImage onLoadFailed: ");
+////                        return false;
+////                    }
+////
+////                    @Override
+////                    public boolean onResourceReady(@NonNull Drawable resource, @NonNull Object model, Target<Drawable> target, @NonNull DataSource dataSource, boolean isFirstResource) {
+////                        int width = resource.getIntrinsicWidth();
+////                        int height = resource.getIntrinsicHeight();
+////                        Log.i(TAG, "onResourceReady: " + "width: " + width + " height:" + height);
+////                        adjustSingleImageViewLayout(width, height);
+////                        return false;
+////                    }
+////                })
+//                .into(singleImageView);
+//        addView(singleImageView);
+//    }
+
+//    private void addGridImages(List<String> urls) {
+//        int imageSize = (getWidth() - (int) mHorizontalMargin * 2) / 3;
+//        int gridSize = Math.min(urls.size(), 9); // Limit to 9 images
+//
+//        for (int i = 0; i < gridSize; i++) {
+//            ImageView imageView = new ImageView(getContext());
+//            LayoutParams params = new LayoutParams(imageSize, imageSize);
+//            params.leftMargin = (i % 3) * (imageSize + (int) mHorizontalMargin / 2);
+//            params.topMargin = (i / 3) * (imageSize + (int) mVerticalMargin / 2);
+//            imageView.setLayoutParams(params);
+//            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
+//            Glide.with(getContext()).load(urls.get(i)).diskCacheStrategy(DiskCacheStrategy.ALL).into(imageView);
+//            addView(imageView);
+//        }
+//    }
+
+// 加载MediaView中的信息
+//    public void setTags(List<String> tags, boolean isPhoto) {
 //        if (this.mTags == tags) {
 //            Log.i(TAG, "setTags: " + tags.toString());
 //            this.removeAllViews();
@@ -101,7 +338,7 @@ public class MediaView extends FrameLayout {
 //            if (isPhoto) {
 //                ImageView child = new ImageView(getContext());
 //                // 单张图片的宽高使用Glide动态获取，根据宽>高，显示横图样式，否则显示竖图样式
-//                Glide.with(child.getContext()) // TODO: 2024/6/14 改为直接getContext()行不行？
+//                Glide.with(child.getContext())
 //                        .load(mTags.get(0))
 //                        .listener(new RequestListener<Drawable>() {
 //                            @Override
@@ -145,79 +382,4 @@ public class MediaView extends FrameLayout {
 //                }
 //            }
 //        }
-    }
-
-
-    private void displayImages() {
-        int size = mTags.size();
-        if (size == 1) {
-            addSingleImage(mTags.get(0));
-        } else {
-            addGridImages(mTags);
-        }
-    }
-
-    private void addSingleImage(String url) {
-        singleImageView = new ImageView(getContext());
-//        LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
-//        imageView.setLayoutParams(params);
-//        singleImageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-        LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, 500);
-        singleImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        singleImageView.setLayoutParams(params);
-
-        Log.i(TAG, "addSingleImage: ");
-        Glide.with(getContext())
-                .load(url)// TODO: 2024/6/14 单张图片的宽高使用Glide动态获取，根据宽>高，显示横图样式，否则显示竖图样式
-//                .listener(new RequestListener<Drawable>() {
-//                    @Override
-//                    public boolean onLoadFailed(@Nullable GlideException e, Object model, @NonNull Target<Drawable> target, boolean isFirstResource) {
-//                        Log.i(TAG, "addSingleImage onLoadFailed: ");
-//                        return false;
-//                    }
-//
-//                    @Override
-//                    public boolean onResourceReady(@NonNull Drawable resource, @NonNull Object model, Target<Drawable> target, @NonNull DataSource dataSource, boolean isFirstResource) {
-//                        int width = resource.getIntrinsicWidth();
-//                        int height = resource.getIntrinsicHeight();
-//                        Log.i(TAG, "onResourceReady: " + "width: " + width + " height:" + height);
-//                        adjustSingleImageViewLayout(width, height);
-//                        return false;
-//                    }
-//                })
-                .into(singleImageView);
-        addView(singleImageView);
-    }
-
-    private void adjustSingleImageViewLayout(int width, int height) {
-        LayoutParams params;
-        Log.i(TAG, "adjustImageViewLayout: " + "width: " + width + " height:" + height);
-        if (width > height) {
-            // Horizontal image
-            params = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
-            singleImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        } else {
-            // Vertical image
-            params = new LayoutParams(LayoutParams.WRAP_CONTENT, LayoutParams.MATCH_PARENT);
-            singleImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-        }
-        singleImageView.setLayoutParams(params);
-    }
-
-    private void addGridImages(List<String> urls) {
-        int imageSize = (getWidth() - (int) mHorizontalMargin * 2) / 3;
-        int gridSize = Math.min(urls.size(), 9); // Limit to 9 images
-
-        for (int i = 0; i < gridSize; i++) {
-            ImageView imageView = new ImageView(getContext());
-            LayoutParams params = new LayoutParams(imageSize, imageSize);
-            params.leftMargin = (i % 3) * (imageSize + (int) mHorizontalMargin / 2);
-            params.topMargin = (i / 3) * (imageSize + (int) mVerticalMargin / 2);
-            imageView.setLayoutParams(params);
-            imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
-            Glide.with(getContext()).load(urls.get(i)).into(imageView);
-            addView(imageView);
-        }
-    }
-
-}
+//    }

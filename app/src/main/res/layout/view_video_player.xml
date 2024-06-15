@@ -36,7 +36,7 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
+    <!--todo: 让ImageView和视频显示在ProgressBar上面-->
     <ImageView
         android:id="@+id/video_cover"
         android:layout_width="match_parent"
@@ -63,7 +63,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
-        android:padding="8dp"
+        android:padding="0dp"
         android:text="00:00/00:00"
         android:textColor="@android:color/white" />
 </FrameLayout>

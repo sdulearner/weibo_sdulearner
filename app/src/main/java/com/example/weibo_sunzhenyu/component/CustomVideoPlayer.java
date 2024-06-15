@@ -17,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.example.weibo_sunzhenyu.R;
 
 import java.io.IOException;
@@ -37,6 +38,17 @@ public class CustomVideoPlayer extends FrameLayout implements SurfaceHolder.Call
     private TimerTask timerTask;
 
     private String videoUrl;
+    // 默认视频的宽高
+    private int videoWidth = 1920;
+    private int videoHeight = 1082;
+
+    public int getVideoWidth() {
+        return videoWidth;
+    }
+
+    public int getVideoHeight() {
+        return videoHeight;
+    }
 
     public CustomVideoPlayer(@NonNull Context context) {
         super(context);
@@ -75,6 +87,7 @@ public class CustomVideoPlayer extends FrameLayout implements SurfaceHolder.Call
         this.videoUrl = videoUrl;
         Glide.with(getContext())
                 .load(coverUrl)
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(videoCover);
 
         setupMediaPlayer();
@@ -85,6 +98,16 @@ public class CustomVideoPlayer extends FrameLayout implements SurfaceHolder.Call
         mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
             @Override
             public void onPrepared(MediaPlayer mp) {
+                mediaPlayer = mp;
+                // 获取视频宽高
+                mediaPlayer.setOnVideoSizeChangedListener(new MediaPlayer.OnVideoSizeChangedListener() {
+                    @Override
+                    public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
+                        // 设置视频宽高
+                        videoWidth = width;
+                        videoHeight = height;
+                    }
+                });
                 mp.setLooping(true);
                 updateProgress();
             }
@@ -104,11 +127,13 @@ public class CustomVideoPlayer extends FrameLayout implements SurfaceHolder.Call
         } catch (IOException e) {
             Log.e(TAG, "Error setting data source", e);
         }
+
+
     }
 
     private void togglePlayPause() {
         if (mediaPlayer.isPlaying()) {
-            // TODO: 2024/6/14  暂停时显示视频图标
+            // TODO: 2024/6/17  暂停时显示视频图标
             videoCover.setImageResource(R.drawable.video);
             videoCover.setVisibility(View.VISIBLE);
             mediaPlayer.pause();
@@ -121,6 +146,7 @@ public class CustomVideoPlayer extends FrameLayout implements SurfaceHolder.Call
         }
     }
 
+    // TODO: 2024/6/17 更改ProgressBar样式
     private void updateProgress() {
         if (timer == null) {
             timer = new Timer();
@@ -159,7 +185,7 @@ public class CustomVideoPlayer extends FrameLayout implements SurfaceHolder.Call
         videoCover.setVisibility(View.VISIBLE);
         surfaceView.setVisibility(View.GONE);
         progressBar.setProgress(0);
-        timeText.setText("00:00/00:00");
+        timeText.setText("00:00/00:00");// TODO: 2024/6/17 设置初始时间
     }
 
     private String formatTime(int millis) {
@@ -185,6 +211,7 @@ public class CustomVideoPlayer extends FrameLayout implements SurfaceHolder.Call
                 mediaPlayer.pause();
                 stopProgressUpdate();
             }
+            // TODO: 2024/6/17 在刷新时释放资源
 //            mediaPlayer.release();
 //            mediaPlayer = null;
         }
