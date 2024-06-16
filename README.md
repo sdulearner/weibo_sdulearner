@@ -4,7 +4,9 @@
 
 <img src="./videos/Screenrecording_20240616_182004.gif" alt="weibo_sdulearner" title="weibo_sdulearner" style="zoom:50%;"/>
 
-2. **调整**
+2. **优化视频的显示效果(未播放和暂停时显示视频图标，暂停时隐藏时间文字)**
+
+<img src="./videos/Screenrecording_20240616_185946.gif" alt="weibo_sdulearner" title="weibo_sdulearner" style="zoom:50%;"/>
 
 # Day16(17:00之前)
 

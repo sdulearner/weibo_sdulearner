@@ -36,18 +36,21 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
+    <!-- Video cover -->
     <ImageView
         android:id="@+id/video_cover"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop" />
 
+    <!-- SurfaceView for video playback -->
     <SurfaceView
         android:id="@+id/surface_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:visibility="gone" />
 
+    <!-- Progress bar -->
     <ProgressBar
         android:id="@+id/progress_bar"
         style="@android:style/Widget.ProgressBar.Horizontal"
@@ -56,8 +59,10 @@
         android:layout_gravity="bottom"
         android:max="100"
         android:progress="0"
-        android:progressDrawable="@drawable/progress_bar" />
+        android:progressDrawable="@drawable/progress_bar"
+        android:visibility="gone" />
 
+    <!-- Time text -->
     <TextView
         android:id="@+id/time_text"
         android:layout_width="wrap_content"
@@ -65,5 +70,15 @@
         android:layout_gravity="bottom|end"
         android:padding="0dp"
         android:text="00:00/00:00"
-        android:textColor="@color/very_light_gray" />
+        android:textColor="@color/very_light_gray"
+        android:visibility="gone" />
+
+    <!-- Play button -->
+    <ImageView
+        android:id="@+id/play_button"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_gravity="center"
+        android:src="@drawable/video"
+        android:visibility="visible" />
 </FrameLayout>

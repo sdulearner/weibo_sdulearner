@@ -1,6 +1,7 @@
 package com.example.weibo_sunzhenyu.component;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.util.AttributeSet;
@@ -25,22 +26,20 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class CustomVideoPlayer extends FrameLayout implements SurfaceHolder.Callback {
-    // TODO: 2024/6/17 实现视频缓存
-    // TODO: 2024/6/18 视频必须全部加载完才可播放，怎样解决这个问题？
-
     private static final String TAG = "CustomVideoPlayer";
 
     private ImageView videoCover;
     private SurfaceView surfaceView;
     private ProgressBar progressBar;
     private TextView timeText;
+    private ImageView playButton;
 
     private MediaPlayer mediaPlayer;
     private Timer timer;
     private TimerTask timerTask;
 
     private String videoUrl;
-    // 默认视频的宽高
+    // 默认的视频宽高
     private int videoWidth = 1920;
     private int videoHeight = 1082;
 
@@ -74,8 +73,16 @@ public class CustomVideoPlayer extends FrameLayout implements SurfaceHolder.Call
         surfaceView = findViewById(R.id.surface_view);
         progressBar = findViewById(R.id.progress_bar);
         timeText = findViewById(R.id.time_text);
+        playButton = findViewById(R.id.play_button);
 
         surfaceView.getHolder().addCallback(this);
+
+        playButton.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                togglePlayPause();
+            }
+        });
 
         this.setOnClickListener(new OnClickListener() {
             @Override
@@ -105,7 +112,6 @@ public class CustomVideoPlayer extends FrameLayout implements SurfaceHolder.Call
                 mediaPlayer.setOnVideoSizeChangedListener(new MediaPlayer.OnVideoSizeChangedListener() {
                     @Override
                     public void onVideoSizeChanged(MediaPlayer mp, int width, int height) {
-                        // 设置视频宽高
                         videoWidth = width;
                         videoHeight = height;
                     }
@@ -133,14 +139,18 @@ public class CustomVideoPlayer extends FrameLayout implements SurfaceHolder.Call
 
     private void togglePlayPause() {
         if (mediaPlayer.isPlaying()) {
-            // TODO: 2024/6/17  暂停时显示视频图标
-            videoCover.setImageResource(R.drawable.video);
-            videoCover.setVisibility(View.VISIBLE);
+            // 2024/6/17  暂停时显示视频图标
+            playButton.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.VISIBLE);
+            timeText.setVisibility(View.GONE);
             mediaPlayer.pause();
             stopProgressUpdate();
         } else {
+            playButton.setVisibility(View.GONE);
             videoCover.setVisibility(View.GONE);
             surfaceView.setVisibility(View.VISIBLE);
+            progressBar.setVisibility(View.VISIBLE);
+            timeText.setVisibility(View.VISIBLE);
             mediaPlayer.start();
             updateProgress();
         }
@@ -182,9 +192,10 @@ public class CustomVideoPlayer extends FrameLayout implements SurfaceHolder.Call
 
     private void resetPlayer() {
         videoCover.setVisibility(View.VISIBLE);
+        playButton.setVisibility(View.VISIBLE);
         surfaceView.setVisibility(View.GONE);
         progressBar.setProgress(0);
-        timeText.setText("00:00/00:00");// TODO: 2024/6/17 设置初始时间
+        timeText.setText("00:00/00:00");
     }
 
     private String formatTime(int millis) {
@@ -211,8 +222,8 @@ public class CustomVideoPlayer extends FrameLayout implements SurfaceHolder.Call
                 stopProgressUpdate();
             }
             // TODO: 2024/6/17 在刷新时释放资源
-//            mediaPlayer.release();
-//            mediaPlayer = null;
+            // mediaPlayer.release();
+            // mediaPlayer = null;
         }
     }
 }
