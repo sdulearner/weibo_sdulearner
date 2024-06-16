@@ -8,6 +8,14 @@
 
 <img src="./videos/Screenrecording_20240616_185946.gif" alt="weibo_sdulearner" title="weibo_sdulearner" style="zoom:50%;"/>
 
+3. **优化登录页面的布局显示**
+
+   <img src="./images/Screenshot_20240616_194520.jpg" alt="weibo_sdulearner" title="weibo_sdulearner" style="zoom:25%;"/>
+
+   ~~之前是这样：~~
+
+   <img src="./images/Screenshot_20240616_194748.jpg" alt="weibo_sdulearner" title="weibo_sdulearner" style="zoom:25%;"/>
+
 # Day16(17:00之前)
 
 [weibo_sdulearner.apk](./app/debug/app-debug.apk)

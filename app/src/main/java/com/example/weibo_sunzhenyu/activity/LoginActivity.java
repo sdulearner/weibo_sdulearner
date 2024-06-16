@@ -114,6 +114,10 @@ public class LoginActivity extends AppCompatActivity {
         // 设置Activity背景为很浅的灰色
         getWindow().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.very_light_gray)));
 
+        // 返回按钮
+        TextView backButton = findViewById(R.id.back_button);
+        backButton.setOnClickListener(v -> onBackPressed());
+
         EditText input_phone = findViewById(R.id.input_phone);
         final boolean[] sendCodeEnabled = {false};
         boolean loginEnabled = false;
@@ -272,6 +276,4 @@ public class LoginActivity extends AppCompatActivity {
             }
         });
     }
-
-
 }
