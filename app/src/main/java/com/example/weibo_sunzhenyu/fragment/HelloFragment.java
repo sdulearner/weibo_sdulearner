@@ -14,8 +14,8 @@ import android.text.method.LinkMovementMethod;
 import android.text.style.ClickableSpan;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -29,6 +29,124 @@ import com.example.weibo_sunzhenyu.activity.MainActivity;
 
 public class HelloFragment extends DialogFragment {
     public static String TAG = "HelloFragment";
+
+    private void saveUserAgreement() {
+        // 使用SharedPreferences保存用户同意状态
+        SharedPreferences preferences = requireActivity().getSharedPreferences("user_pref", Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = preferences.edit();
+        editor.putBoolean("user_agreed", true);
+        editor.apply();
+    }
+
+    // 设置自定义动画（可选）
+    @Override
+    public void onStart() {
+        super.onStart();
+        Dialog dialog = getDialog();
+        if (dialog != null) {
+            // 设置DialogFragment宽度为屏幕宽度的70%
+            int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.7f);
+            if (dialog.getWindow() != null) {
+                dialog.getWindow().setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT);
+            }
+        }
+    }
+
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        View view = LayoutInflater.from(requireActivity()).inflate(R.layout.hello_fragment, null);
+        // 设置按钮点击监听器
+        TextView btn_agree = view.findViewById(R.id.btn_agree);
+        btn_agree.setOnClickListener(v -> {
+            // 保存用户同意状态
+            saveUserAgreement();
+            dismiss(); // 关闭弹窗
+            // 跳转到首页
+            Intent intent = new Intent(view.getContext(), MainActivity.class);
+            startActivity(intent);
+            // 销毁HelloActivity
+            requireActivity().finish();
+        });
+
+        view.findViewById(R.id.btn_disagree).setOnClickListener(v -> {
+            // 用户不同意，退出应用
+            requireActivity().finishAffinity(); // 如果在Activity中，可以结束当前Activity及其上的所有Activity
+            dismiss(); // 关闭弹窗
+        });
+
+        TextView tv_title = view.findViewById(R.id.tv_title);
+        TextView tv_message = view.findViewById(R.id.tv_message);
+        // 清除TextView的选中状态（可能有助于避免点击时的背景颜色变化）
+        tv_message.setHighlightColor(Color.TRANSPARENT); // 设置为透明色
+        tv_message.setSelected(false); // 清除选中状态
+
+        SpannableString spannableString = new SpannableString("欢迎使用iH微博，" +
+                "我们将严格遵守相关法律和隐私政策保护您的个人隐私，请您阅读并同意《用户协议》与《隐私政策》");
+        ClickableSpan userAgreementSpan = new ClickableSpan() {
+            @Override
+            public void onClick(View widget) {
+                Toast.makeText(getContext(), "查看⽤⼾协议", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void updateDrawState(TextPaint ds) {
+                super.updateDrawState(ds);
+                ds.setColor(requireActivity().getColor(R.color.link)); // 设置链接文本颜色为蓝色
+                ds.setUnderlineText(false); // 取消下划线
+            }
+        };
+        ClickableSpan privacyPolicySpan = new ClickableSpan() {
+            @Override
+            public void onClick(@NonNull View widget) {
+                Toast.makeText(getContext(), "查看隐私政策", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void updateDrawState(TextPaint ds) {
+                super.updateDrawState(ds);
+                ds.setColor(requireActivity().getColor(R.color.link)); // 设置链接文本颜色为蓝色
+                ds.setUnderlineText(false); // 取消下划线
+            }
+        };
+        // 设置用户协议的Span
+        int start = 41;//文本中“用户协议”的起始位置
+        int end = 47;//文本中“用户协议”的结束位置
+        spannableString.setSpan(userAgreementSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        // 同样设置“隐私政策”的Span
+        start = 48;//文本中“用户协议”的起始位置
+        end = 54;//文本中“用户协议”的结束位置
+        spannableString.setSpan(privacyPolicySpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+        //在点击链接时，有执行的动作，都必须设置 MovementMethod对象
+        tv_message
+                .setMovementMethod(LinkMovementMethod.getInstance());
+        tv_message.setText(spannableString);
+
+        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
+        builder.setView(view);
+        Dialog dialog = builder.create();
+        // 当用户按下返回键时，你可以根据需要处理，比如弹出提示或者直接不关闭对话框
+        dialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
+            @Override
+            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
+                if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_UP) {
+                    Toast.makeText(getActivity(), "请先做出选择！", Toast.LENGTH_SHORT).show();
+                    return true; // 返回true表示消费了这个事件，即不关闭对话框
+                }
+                return false;
+            }
+        });
+
+        // 设置对话框背景为圆角矩形
+        if (dialog.getWindow() != null) {
+            dialog.getWindow().setBackgroundDrawableResource(R.drawable.rounded_background);
+        }
+
+        return dialog;
+    }
+}
 
 //    @Nullable
 //    @Override
@@ -86,123 +204,7 @@ public class HelloFragment extends DialogFragment {
 //        return view;
 //    }
 
-    private void saveUserAgreement() {
-        // 使用SharedPreferences保存用户同意状态
-        SharedPreferences preferences = requireActivity().getSharedPreferences("user_pref", Context.MODE_PRIVATE);
-        SharedPreferences.Editor editor = preferences.edit();
-        editor.putBoolean("user_agreed", true);
-        editor.apply();
-    }
 
-
-    // 设置自定义动画（可选）
-    @Override
-    public void onStart() {
-        super.onStart();
-        Dialog dialog = getDialog();
-        if (dialog != null) {
-//            dialog.getWindow().getAttributes().windowAnimations = R.style.DialogAnimation;
-        }
-    }
-
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-
-        View view = LayoutInflater.from(requireActivity()).inflate(R.layout.hello_fragment, null);
-        // 设置按钮点击监听器
-        TextView btn_agree = view.findViewById(R.id.btn_agree);
-        btn_agree.setOnClickListener(v -> {
-            // 保存用户同意状态
-            saveUserAgreement();
-            dismiss(); // 关闭弹窗
-            // 跳转到首页
-            Intent intent = new Intent(view.getContext(), MainActivity.class);
-            // TODO: 2024/6/17 通过Activity转场动画，闪屏页自然过渡到首页，动画自由发挥
-            startActivity(intent);
-            // 销毁HelloActivity
-            requireActivity().finish();
-        });
-
-        view.findViewById(R.id.btn_disagree).setOnClickListener(v -> {
-            // 用户不同意，退出应用
-            requireActivity().finishAffinity(); // 如果在Activity中，可以结束当前Activity及其上的所有Activity
-            dismiss(); // 关闭弹窗
-        });
-
-        TextView tv_title = view.findViewById(R.id.tv_title);
-        TextView tv_message = view.findViewById(R.id.tv_message);
-        // 清除TextView的选中状态（可能有助于避免点击时的背景颜色变化）
-        tv_message.setHighlightColor(Color.TRANSPARENT); // 设置为透明色
-        tv_message.setSelected(false); // 清除选中状态
-
-        SpannableString spannableString = new SpannableString("欢迎使用iH微博，" +
-                "我们将严格遵守相关法律和隐私政策保护您的个人隐私，请您阅读并同意《用户协议》与《隐私政策》");
-        ClickableSpan userAgreementSpan = new ClickableSpan() {
-            @Override
-            public void onClick(View widget) {
-
-                Toast.makeText(getContext(), "查看⽤⼾协议", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void updateDrawState(TextPaint ds) {
-                super.updateDrawState(ds);
-                ds.setColor(requireActivity().getColor(R.color.link)); // 设置链接文本颜色为蓝色
-                ds.setUnderlineText(false); // 取消下划线
-            }
-        };
-        ClickableSpan privacyPolicySpan = new ClickableSpan() {
-            @Override
-            public void onClick(@NonNull View widget) {
-                Toast.makeText(getContext(), "查看隐私政策", Toast.LENGTH_SHORT).show();
-            }
-
-            @Override
-            public void updateDrawState(TextPaint ds) {
-                super.updateDrawState(ds);
-                ds.setColor(requireActivity().getColor(R.color.link)); // 设置链接文本颜色为蓝色
-                ds.setUnderlineText(false); // 取消下划线
-            }
-        };
-        // 设置用户协议的Span
-        int start = 41;//文本中“用户协议”的起始位置
-        int end = 47;//文本中“用户协议”的结束位置
-        spannableString.setSpan(userAgreementSpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-        // 同样设置“隐私政策”的Span
-        start = 48;//文本中“用户协议”的起始位置
-        end = 54;//文本中“用户协议”的结束位置
-        spannableString.setSpan(privacyPolicySpan, start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-        //在点击链接时，有执行的动作，都必须设置 MovementMethod对象
-        tv_message.setMovementMethod(LinkMovementMethod.getInstance());
-        tv_message.setText(spannableString);
-
-        AlertDialog.Builder builder = new AlertDialog.Builder(requireActivity());
-        builder.setView(view);
-        Dialog dialog = builder.create();
-        // 当用户按下返回键时，你可以根据需要处理，比如弹出提示或者直接不关闭对话框
-        dialog.setOnKeyListener(new DialogInterface.OnKeyListener() {
-            @Override
-            public boolean onKey(DialogInterface dialog, int keyCode, KeyEvent event) {
-                if (keyCode == KeyEvent.KEYCODE_BACK && event.getAction() == KeyEvent.ACTION_UP) {
-                    Toast.makeText(getActivity(), "请先做出选择！", Toast.LENGTH_SHORT).show();
-                    return true; // 返回true表示消费了这个事件，即不关闭对话框
-                }
-                return false;
-            }
-        });
-
-        // 设置对话框背景为圆角矩形
-        dialog.getWindow().
-
-                setBackgroundDrawableResource(R.drawable.rounded_background);
-        // todo:2024/6/17 设置DialogFragment宽度为屏幕宽度的80%，你可以根据需要调整这个比例
-//        int width = (int) (getResources().getDisplayMetrics().widthPixels * 0.5f); // 80%的屏幕宽度
-//        dialog.getWindow().setLayout(width, ViewGroup.LayoutParams.WRAP_CONTENT); // 设置宽度，高度根据内容自适应
-
-        return dialog;
 //        return new AlertDialog.Builder(requireContext())
 //                .setTitle("声明与条款")
 //                .setMessage("欢迎使用iH微博，" +
@@ -226,5 +228,3 @@ public class HelloFragment extends DialogFragment {
 //                    }
 //                })
 //                .create();
-    }
-}

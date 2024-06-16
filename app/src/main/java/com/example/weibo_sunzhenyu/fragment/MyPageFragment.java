@@ -108,7 +108,6 @@ public class MyPageFragment extends Fragment {
                                             .diskCacheStrategy(DiskCacheStrategy.ALL)
                                             .into(my_page_avatar);
                                     text_username.setText(user.getUsername());
-                                    // TODO: 2024/6/17 用户名下面的粉丝数暂时用phone代替
                                     text_loginStatus.setText(user.getPhone());
                                     // 并显示退出登录按钮
                                     logout.setVisibility(View.VISIBLE);

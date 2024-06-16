@@ -35,7 +35,6 @@ public class ImageViewerAdapter extends RecyclerView.Adapter<ImageViewerAdapter.
 
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        // TODO: 2024/6/16 图片以宽度为基础，高度自适应；高度小于屏幕高度则上下居中
         Glide.with(holder.itemView.getContext()).load(imageUrls.get(position)).into(holder.imageView);
         
         // 设置图片的点击事件监听器

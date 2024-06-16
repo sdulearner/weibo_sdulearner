@@ -40,7 +40,7 @@
             app:layout_constraintEnd_toStartOf="@+id/big_createTime"
             app:layout_constraintStart_toEndOf="@+id/big_avatar"
             app:layout_constraintTop_toTopOf="parent" />
-        <!--    todo:    创建时间暂时不显示-->
+        <!--创建时间暂时不显示-->
         <TextView
             android:id="@+id/big_createTime"
             android:layout_width="90dp"

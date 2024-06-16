@@ -197,30 +197,7 @@ public class HomeFragmentAdapter extends BaseQuickAdapter<WeiboInfoItem, BaseVie
     @Override
     public void onBindViewHolder(@NonNull BaseViewHolder holder, int position) {
         super.onBindViewHolder(holder, position);
-        // FIXME: 2024/6/16 在这里设置监听会有Bug
-//        FATAL EXCEPTION: main
-//        Process: com.example.weibo_sunzhenyu, PID: 11906
-//        java.lang.IllegalStateException: No view found with id 2131230818
-//        at com.chad.library.adapter.base.viewholder.BaseViewHolder.getView(BaseViewHolder.kt:38)
-//        at com.example.weibo_sunzhenyu.adapter.HomeFragmentAdapter.onBindViewHolder(HomeFragmentAdapter.java:41)
-//        // 关闭按钮的监听
-//        TextView big_close = holder.getView(R.id.big_close);
-//        big_close.setOnClickListener(v -> {
-//            // 删除当前item
-//            getData().remove(position);
-//            notifyItemRemoved(position);
-//            notifyItemRangeChanged(position, getItemCount());
-//        });
-//        // 评论的监听
-//        TextView big_commentIcon = holder.getView(R.id.big_commentIcon);
-//        TextView big_commentText = holder.getView(R.id.big_commentText);
-//        String text = "点击第" + (position + 1) + "条数据评论按钮";
-//        big_commentIcon.setOnClickListener(v -> {
-//            Toast.makeText(getContext(), text, Toast.LENGTH_SHORT).show();
-//        });
-//        big_commentText.setOnClickListener(v -> {
-//            Toast.makeText(getContext(), text, Toast.LENGTH_SHORT).show();
-//        });
+
     }
 
     @NonNull
