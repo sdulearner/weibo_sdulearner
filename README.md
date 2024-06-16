@@ -1,5 +1,7 @@
 # Day16(20:00之前)
 
+[weibo_sdulearner.apk](./app/debug/app-debug.apk)
+
 1. **调整HelloFragment(声明与条款弹窗)的视觉效果**
 
 <img src="./videos/Screenrecording_20240616_182004.gif" alt="weibo_sdulearner" title="weibo_sdulearner" style="zoom:50%;"/>
@@ -17,8 +19,6 @@
    <img src="./images/Screenshot_20240616_194748.jpg" alt="weibo_sdulearner" title="weibo_sdulearner" style="zoom:25%;"/>
 
 # Day16(17:00之前)
-
-[weibo_sdulearner.apk](./app/debug/app-debug.apk)
 
 ### token过期问题
 
