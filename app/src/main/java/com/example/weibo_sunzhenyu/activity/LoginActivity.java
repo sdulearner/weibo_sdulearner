@@ -7,6 +7,7 @@ import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -109,7 +110,9 @@ public class LoginActivity extends AppCompatActivity {
         // 设置状态栏的颜色
         Window window = getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(getColor(R.color.deep_blue));
+        window.setStatusBarColor(getColor(R.color.white));
+        // 设置Activity背景为很浅的灰色
+        getWindow().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.very_light_gray)));
 
         EditText input_phone = findViewById(R.id.input_phone);
         final boolean[] sendCodeEnabled = {false};
@@ -205,6 +208,7 @@ public class LoginActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 //                Toast.makeText(LoginActivity.this, "获取验证码", Toast.LENGTH_SHORT).show();
+                // TODO: 2024/6/16 点击获取验证码将光标移动到输入验证码的Edittext
                 // 使用Gson直接构造请求体（虽然这里没直接用到，但确保Gson存在以解释如何构造复杂对象）
                 Gson gson = new GsonBuilder().create();
                 Map<String, String> requestBody = new HashMap<>();

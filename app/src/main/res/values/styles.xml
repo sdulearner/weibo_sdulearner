@@ -26,11 +26,14 @@
     <!-- Style for the AppBarLayout -->
     <style name="AppTheme.AppBarOverlay" parent="ThemeOverlay.AppCompat.Dark.ActionBar">
         <!-- Support library compatibility -->
-        <item name="android:background">@color/link</item>
+        <item name="android:background">@color/white</item>
     </style>
     <!-- Style for the Popup Menu (e.g., overflow menu) -->
     <style name="AppTheme.PopupOverlay" parent="ThemeOverlay.AppCompat.Light">
         <!-- Support library compatibility -->
-        <item name="android:background">@color/link</item>
+        <item name="android:background">@color/white</item>
+    </style>
+    <style name="TransparentBackground" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="android:windowBackground">@android:color/transparent</item>
     </style>
 </resources>

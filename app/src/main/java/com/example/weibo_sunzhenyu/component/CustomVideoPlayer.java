@@ -26,6 +26,7 @@ import java.util.TimerTask;
 
 public class CustomVideoPlayer extends FrameLayout implements SurfaceHolder.Callback {
     // TODO: 2024/6/16 实现视频缓存
+    // TODO: 2024/6/18 视频必须全部加载完才可播放，怎样解决这个问题？
 
     private static final String TAG = "CustomVideoPlayer";
 

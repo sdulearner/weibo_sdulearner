@@ -1,7 +1,5 @@
 package com.example.weibo_sunzhenyu.adapter;
 
-import static androidx.core.content.ContextCompat.startActivity;
-
 import android.animation.Animator;
 import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
@@ -12,7 +10,6 @@ import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,12 +30,9 @@ import com.example.weibo_sunzhenyu.entity.CommonData;
 import com.example.weibo_sunzhenyu.entity.LoginEvent;
 import com.example.weibo_sunzhenyu.entity.UserInfoItem;
 import com.example.weibo_sunzhenyu.entity.WeiboInfoItem;
-import com.example.weibo_sunzhenyu.fragment.MyPageFragment;
 import com.example.weibo_sunzhenyu.layout.MediaView;
 import com.example.weibo_sunzhenyu.utils.Utils;
 import com.google.gson.Gson;
-
-import org.greenrobot.eventbus.EventBus;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -105,7 +99,8 @@ public class HomeFragmentAdapter extends BaseQuickAdapter<WeiboInfoItem, BaseVie
                         if (body.getCode() == 200) {
                             Log.i(TAG, "retrofitLike: 点赞成功");
                         } else
-                            Toast.makeText(getContext(), "点赞失败，" + body.getMsg(), Toast.LENGTH_SHORT).show();
+                            Log.i(TAG, "点赞失败，" + body.getMsg());
+//                            Toast.makeText(getContext(), "点赞失败，" + body.getMsg(), Toast.LENGTH_SHORT).show();
                     }
                 }
 
@@ -124,7 +119,8 @@ public class HomeFragmentAdapter extends BaseQuickAdapter<WeiboInfoItem, BaseVie
                         if (body.getCode() == 200) {
                             Log.i(TAG, "retrofitLike: 取消点赞成功");
                         } else
-                            Toast.makeText(getContext(), "取消点赞失败，" + body.getMsg(), Toast.LENGTH_SHORT).show();
+                            Log.i(TAG, "点赞失败，" + body.getMsg());
+//                            Toast.makeText(getContext(), "取消点赞失败，" + body.getMsg(), Toast.LENGTH_SHORT).show();
                     }
                 }
 
@@ -241,6 +237,7 @@ public class HomeFragmentAdapter extends BaseQuickAdapter<WeiboInfoItem, BaseVie
         ImageView big_avatar = baseViewHolder.getView(R.id.big_avatar);
         Glide.with(big_avatar.getContext())
                 .load(weiboInfoItem.getAvatar())
+                .circleCrop()
                 .diskCacheStrategy(DiskCacheStrategy.ALL)
                 .into(big_avatar);
 
@@ -270,7 +267,7 @@ public class HomeFragmentAdapter extends BaseQuickAdapter<WeiboInfoItem, BaseVie
         } else if (images != null) {
             mTags.addAll(images);
         }
-        mediaView.setTags(mTags, isPhoto);
+        mediaView.setTags(mTags, isPhoto, weiboInfoItem.getAvatar(), weiboInfoItem.getUsername());
 
         // 加载点赞评论
         TextView big_likeIcon = baseViewHolder.getView(R.id.big_likeIcon);

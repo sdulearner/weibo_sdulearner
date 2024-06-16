@@ -1,6 +1,8 @@
 package com.example.weibo_sunzhenyu.layout;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.res.TypedArray;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -12,6 +14,8 @@ import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.ActivityOptionsCompat;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
@@ -20,8 +24,10 @@ import com.bumptech.glide.load.engine.GlideException;
 import com.bumptech.glide.request.RequestListener;
 import com.bumptech.glide.request.target.Target;
 import com.example.weibo_sunzhenyu.R;
+import com.example.weibo_sunzhenyu.activity.ImageViewerActivity;
 import com.example.weibo_sunzhenyu.component.CustomVideoPlayer;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class MediaView extends FrameLayout {
@@ -75,14 +81,14 @@ public class MediaView extends FrameLayout {
 
 
     // 加载MediaView中的信息
-    public void setTags(List<String> tags, boolean isPhoto) {
+    public void setTags(List<String> tags, boolean isPhoto, String userAvatarUrl, String userName) {
         removeAllViews();
         isSingleImage = false;
         isVideo = false;
         mTags = tags;
         if (isPhoto) {
             if (tags != null && !tags.isEmpty()) {
-                displayImages();
+                displayImages(userAvatarUrl, userName);
 //                videoPlayer.setVisibility(View.GONE);
             }
         } else {
@@ -96,12 +102,12 @@ public class MediaView extends FrameLayout {
     }
 
 
-    private void displayImages() {
+    private void displayImages(String userAvatarUrl, String userName) {
         int size = mTags.size();
         if (size == 1) {
-            addSingleImage(mTags.get(0));
+            addSingleImage(mTags.get(0), userAvatarUrl, userName);
         } else {
-            addGridImages(mTags);
+            addGridImages(mTags, userAvatarUrl, userName);
         }
     }
 
@@ -121,11 +127,23 @@ public class MediaView extends FrameLayout {
         singleImageView.setLayoutParams(params);
     }
 
-    private void addSingleImage(String url) {
+    private void addSingleImage(String url, String userAvatarUrl, String userName) {
         isSingleImage = true;
         singleImageView = new ImageView(getContext());
         singleImageView.setScaleType(ImageView.ScaleType.FIT_CENTER);
         singleImageView.setImageDrawable(new ColorDrawable(0xFFCCCCCC)); // 灰色方框作为占位符
+
+        // 设置点击跳转到大图浏览
+        singleImageView.setOnClickListener(v -> {
+            Intent intent = new Intent(getContext(), ImageViewerActivity.class);
+            intent.putStringArrayListExtra("imageUrls", new ArrayList<>(mTags));
+            intent.putExtra("currentIndex", 0); // 单张图片索引为0
+            intent.putExtra("userAvatarUrl", userAvatarUrl); // 用户头像
+            intent.putExtra("userName", userName); // 用户名
+
+            ActivityOptionsCompat options = ActivityOptionsCompat.makeScaleUpAnimation(singleImageView, 0, 0, singleImageView.getWidth(), singleImageView.getHeight());
+            ActivityCompat.startActivity(getContext(), intent, options.toBundle());
+        });
 
         Log.i(TAG, "addSingleImage: ");
         Glide.with(getContext())
@@ -151,7 +169,7 @@ public class MediaView extends FrameLayout {
         addView(singleImageView);
     }
 
-    private void addGridImages(List<String> urls) {
+    private void addGridImages(List<String> urls, String userAvatarUrl, String userName) {
         int imageSize = (getWidth() - (int) mHorizontalMargin * 2) / 3;
         int gridSize = Math.min(urls.size(), 9); // Limit to 9 images
 
@@ -161,6 +179,20 @@ public class MediaView extends FrameLayout {
             imageView.setLayoutParams(params);
             imageView.setScaleType(ImageView.ScaleType.CENTER_CROP);
             imageView.setBackgroundColor(getResources().getColor(R.color.gray2)); // 灰色方框作为未加载时的占位
+
+            // 设置点击跳转到大图浏览
+            int finalI = i;
+            imageView.setOnClickListener(v -> {
+                Intent intent = new Intent(getContext(), ImageViewerActivity.class);
+                intent.putStringArrayListExtra("imageUrls", new ArrayList<>(mTags));
+                intent.putExtra("currentIndex", finalI);
+                intent.putExtra("userAvatarUrl", userAvatarUrl); // 用户头像
+                intent.putExtra("userName", userName); // 用户名
+
+                ActivityOptionsCompat options = ActivityOptionsCompat.makeScaleUpAnimation(imageView, 0, 0, imageView.getWidth(), imageView.getHeight());
+                ActivityCompat.startActivity(getContext(), intent, options.toBundle());
+            });
+
             Glide.with(getContext()).load(urls.get(i)).diskCacheStrategy(DiskCacheStrategy.ALL).into(imageView);
             addView(imageView);
         }

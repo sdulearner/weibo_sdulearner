@@ -26,8 +26,9 @@
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:text="登录账号"
-                android:textColor="@color/white"
-                android:textSize="22sp" />
+                android:textColor="@color/black"
+                android:textSize="18sp"
+                android:textStyle="bold" />
 
         </androidx.appcompat.widget.Toolbar>
 

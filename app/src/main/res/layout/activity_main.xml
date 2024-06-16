@@ -19,14 +19,16 @@
             android:layout_width="match_parent"
             android:layout_height="50dp"
             app:popupTheme="@style/AppTheme.PopupOverlay"
-            app:titleTextColor="@android:color/white" >
+            app:titleTextColor="@android:color/white">
+
             <TextView
                 android:id="@+id/title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textColor="@color/black"
                 android:textSize="18sp"
-                android:textColor="@color/white"
-                android:layout_gravity="center"/>
+                android:textStyle="bold" />
 
         </androidx.appcompat.widget.Toolbar>
 
@@ -52,10 +54,10 @@
         android:id="@+id/tab_layout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textAlignment="center"
         app:itemIconTint="@color/link"
         app:itemTextColor="@color/link"
         app:labelVisibilityMode="labeled"
-        android:textAlignment="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:menu="@menu/bottom_navigation_menu"
         app:tabTextAppearance="@style/CustomTabTextAppearance" />

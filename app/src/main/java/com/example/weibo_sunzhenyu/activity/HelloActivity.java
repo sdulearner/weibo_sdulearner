@@ -46,6 +46,7 @@ public class HelloActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        // TODO: 2024/6/16 检查设计稿还原度: ，视频样式：未播放和暂停时显示暂停图标，底部导航点击变色，退出登录写在ToolBar
         super.onCreate(savedInstanceState);
         // 设置全屏模式
         getWindow().setFlags(

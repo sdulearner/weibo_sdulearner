@@ -1,6 +1,8 @@
 package com.example.weibo_sunzhenyu.activity;
 
 import android.annotation.SuppressLint;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuItem;
@@ -43,7 +45,10 @@ public class MainActivity extends AppCompatActivity {
         // 设置状态栏的颜色
         Window window = getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        window.setStatusBarColor(getColor(R.color.deep_blue));
+        window.setStatusBarColor(getColor(R.color.white));
+        // 设置Activity背景为很浅的灰色
+        getWindow().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.very_light_gray)));
+
 
         Toolbar toolbar = findViewById(R.id.toolbar);
         TextView title = findViewById(R.id.title);
@@ -67,7 +72,7 @@ public class MainActivity extends AppCompatActivity {
         getSupportActionBar().setTitle(null);
         getSupportActionBar().setSubtitle(null); // 如果有副标题也一并清空
         getSupportActionBar().setDisplayShowTitleEnabled(false); // 确保标题区域不占据空间
-        title.setText("推荐");
+        title.setText("iH推荐");
 
         // 设置 BottomNavigationView 的监听器
         bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
@@ -86,7 +91,7 @@ public class MainActivity extends AppCompatActivity {
                                 .setReorderingAllowed(true)
                                 .hide(fragment2)
                                 .commit();
-                    title.setText("推荐");
+                    title.setText("iH推荐");
                     return true;
                 } else if (item.getItemId() == R.id.navigation_my) {
                     //动态添加MyPageFragment，如果第一次点击则建立一个新的，否则直接显示出来
