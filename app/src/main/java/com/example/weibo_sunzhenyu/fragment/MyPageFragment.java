@@ -25,6 +25,7 @@ import com.example.weibo_sunzhenyu.R;
 import com.example.weibo_sunzhenyu.activity.LoginActivity;
 import com.example.weibo_sunzhenyu.entity.CommonData;
 import com.example.weibo_sunzhenyu.entity.LoginEvent;
+import com.example.weibo_sunzhenyu.entity.LogoutEvent;
 import com.example.weibo_sunzhenyu.entity.UserInfoItem;
 import com.example.weibo_sunzhenyu.utils.Utils;
 import com.google.gson.Gson;
@@ -92,6 +93,8 @@ public class MyPageFragment extends Fragment {
                                 // token过期，未登录状态
                                 Utils.clearToken(requireActivity());
                                 Log.e(TAG, "token过期");
+                                Intent intent = new Intent(requireActivity(), LoginActivity.class);
+                                startActivity(intent);
                             } else {
                                 // 请求成功将用户赋给变量
                                 user = body.getData();
@@ -161,6 +164,8 @@ public class MyPageFragment extends Fragment {
         text_loginStatus.setText("点击头像登录");
         // 并隐藏退出登录按钮
         logout.setVisibility(View.INVISIBLE);
+        // 退出登录后刷新首页
+        EventBus.getDefault().post(new LogoutEvent(false));
     }
 
     @Nullable

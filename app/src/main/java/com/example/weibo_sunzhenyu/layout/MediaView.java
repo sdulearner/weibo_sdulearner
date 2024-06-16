@@ -4,18 +4,14 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.GradientDrawable;
-import android.net.Uri;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.DataSource;
@@ -174,23 +170,6 @@ public class MediaView extends FrameLayout {
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         super.onMeasure(widthMeasureSpec, heightMeasureSpec);
         int totalWidth = MeasureSpec.getSize(widthMeasureSpec);
-//        int totalHeight = 0;
-//        if (isSingleImage) {
-//            // 单张图片的宽高使用Glide动态获取，根据宽高显示横图样式或竖图样式
-//            if (singleImageWidth > singleImageHeight) {
-//                // 横图样式
-//                totalHeight = (int) (totalWidth * ((float) singleImageHeight / singleImageWidth));
-//            } else {
-//                // 竖图样式
-//                totalHeight = Math.min(totalWidth, singleImageHeight);
-//            }
-//            setMeasuredDimension(totalWidth, totalHeight);
-//            measureChild(singleImageView, widthMeasureSpec, heightMeasureSpec);
-//        } else if (isVideo) {
-//            // 视频显示规则：默认显示横图样式
-//            totalHeight = 500; // 默认视频高度
-//            setMeasuredDimension(totalWidth, totalHeight);
-//            measureChild(customVideoPlayer, widthMeasureSpec, heightMeasureSpec);
         if (isSingleImage && singleImageWidth > 0 && singleImageHeight > 0) {
             // 单张图片或视频显示横图样式
             int childWidth = totalWidth;
@@ -249,6 +228,8 @@ public class MediaView extends FrameLayout {
                 }
             }
         }
+    }
+}
 //        else if (isVideo) {
 //            // 布局视频
 //            int childWidth = customVideoPlayer.getMeasuredWidth();
@@ -269,8 +250,7 @@ public class MediaView extends FrameLayout {
 //                }
 //            }
 //        }
-    }
-}
+
 //    private void addSingleImage(String url) {
 //        singleImageView = new ImageView(getContext());
 ////        LayoutParams params = new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);

@@ -25,6 +25,7 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 public class CustomVideoPlayer extends FrameLayout implements SurfaceHolder.Callback {
+    // TODO: 2024/6/16 实现视频缓存
 
     private static final String TAG = "CustomVideoPlayer";
 
@@ -127,8 +128,6 @@ public class CustomVideoPlayer extends FrameLayout implements SurfaceHolder.Call
         } catch (IOException e) {
             Log.e(TAG, "Error setting data source", e);
         }
-
-
     }
 
     private void togglePlayPause() {

@@ -31,10 +31,12 @@ import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 import com.bumptech.glide.Glide;
 import com.chad.library.adapter.base.listener.OnLoadMoreListener;
 import com.example.weibo_sunzhenyu.R;
+import com.example.weibo_sunzhenyu.activity.LoginActivity;
 import com.example.weibo_sunzhenyu.adapter.HomeFragmentAdapter;
 import com.example.weibo_sunzhenyu.entity.CommonData;
 import com.example.weibo_sunzhenyu.entity.DataItem;
 import com.example.weibo_sunzhenyu.entity.LoginEvent;
+import com.example.weibo_sunzhenyu.entity.LogoutEvent;
 import com.example.weibo_sunzhenyu.entity.UserInfoItem;
 import com.example.weibo_sunzhenyu.entity.WeiboInfoItem;
 import com.example.weibo_sunzhenyu.utils.Utils;
@@ -191,6 +193,8 @@ public class HomeFragment extends Fragment {
                                 Utils.clearToken(requireActivity());
                                 Log.e(TAG, "token过期");
                                 retrofitGet(false, refresh);
+                                Intent intent = new Intent(requireActivity(), LoginActivity.class);
+                                startActivity(intent);
                             } else {
                                 // 请求成功将用户赋给变量
                                 user[0] = body.getData();
@@ -394,5 +398,13 @@ public class HomeFragment extends Fragment {
     public void onMsgEvent(LoginEvent loginEvent) {
         Log.e(TAG, "onMsgEvent: " + loginEvent.isLogin());
         if (loginEvent.isLogin()) retrofitGet(true, false);
+    }
+
+    // 退出登录时用EventBus传递消息实现更新
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onMsgEvent(LogoutEvent loginEvent) {
+        Log.e(TAG, "onMsgEvent: " + loginEvent.isLogin());
+        // 退出登录则刷新页面
+        if (!loginEvent.isLogin()) retrofitGet(false, false);
     }
 }

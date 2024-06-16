@@ -81,10 +81,11 @@ public class MainActivity extends AppCompatActivity {
                             .setReorderingAllowed(true)
                             .show(fragment1)
                             .commit();
-                    fragmentManager.beginTransaction()
-                            .setReorderingAllowed(true)
-                            .hide(fragment2)
-                            .commit();
+                    if (fragment2 != null)
+                        fragmentManager.beginTransaction()
+                                .setReorderingAllowed(true)
+                                .hide(fragment2)
+                                .commit();
                     title.setText("推荐");
                     return true;
                 } else if (item.getItemId() == R.id.navigation_my) {
