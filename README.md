@@ -1,6 +1,20 @@
-# Day16(20:00之前)
+# 小米实践训练营-项目实践
 
 [weibo_sdulearner.apk](./app/debug/app-debug.apk)
+
+**项目结构**
+
+<img src="./images/Screenshot_20240626194536.png" alt="weibo_sdulearner" title="weibo_sdulearner" style="zoom:50%;"/>
+
+**最终效果演示**
+
+[演示视频](./videos/video_20240626_201113_edit.mp4)
+
+**课程培训地址**
+
+[课程培训地址](https://github.com/sdulearner/sdulearner_xiaomi)
+
+# Day16(20:00之前)
 
 1. **调整HelloFragment(声明与条款弹窗)的视觉效果**
 
@@ -14,15 +28,13 @@
 
    <img src="./images/Screenshot_20240616_194520.jpg" alt="weibo_sdulearner" title="weibo_sdulearner" style="zoom:25%;"/>
 
-   ~~之前是这样：~~
-
-   <img src="./images/Screenshot_20240616_194748.jpg" alt="weibo_sdulearner" title="weibo_sdulearner" style="zoom:25%;"/>
+   
 
 # Day16(17:00之前)
 
 ### token过期问题
 
-1. - [x] 所有接⼝请求报403时，删除本地token，将登陆状态改为未登录并且跳转到登录⻚⾯  
+1. - [x] 所有接⼝请求报403时，删除本地token，将登陆状态改为未登录并且跳转到登录页面  
 
 ### 首页
 
@@ -144,8 +156,6 @@
 
 1. HelloFragment弹窗中ClickableSpan富文本（《用户协议》、《隐私政策》）字体改为蓝色，并且点击不会变深；
    为同意和不同意的按钮设置了按下改变颜色
-
-   [HelloFragment更新演示视频](./videos/Screen_recording_20240613_205702.webm)
 
 2. 更新了顶部ToolBar的显示效果
 

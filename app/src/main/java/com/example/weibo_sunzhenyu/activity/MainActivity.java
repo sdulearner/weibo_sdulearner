@@ -1,9 +1,7 @@
 package com.example.weibo_sunzhenyu.activity;
 
 import android.annotation.SuppressLint;
-import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
@@ -14,18 +12,12 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
-import androidx.fragment.app.FragmentTransaction;
 
 import com.example.weibo_sunzhenyu.R;
-import com.example.weibo_sunzhenyu.adapter.MyFragmentAdapter;
 import com.example.weibo_sunzhenyu.fragment.HomeFragment;
 import com.example.weibo_sunzhenyu.fragment.MyPageFragment;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
-
-import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
     private BottomNavigationView bottomNavigationView;
@@ -46,6 +38,12 @@ public class MainActivity extends AppCompatActivity {
         Window window = getWindow();
         window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
         window.setStatusBarColor(getColor(R.color.white));
+//        window.setStatusBarColor(Color.TRANSPARENT);
+        // 设置状态栏字体为深色
+        View decorView = getWindow().getDecorView();
+        int flags = decorView.getSystemUiVisibility();
+        flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR; // 设置状态栏文本为深色
+        decorView.setSystemUiVisibility(flags);
         // 设置Activity背景为很浅的灰色
         getWindow().setBackgroundDrawable(new ColorDrawable(getResources().getColor(R.color.very_light_gray)));
 
